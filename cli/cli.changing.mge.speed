@@ -1,0 +1,23 @@
+1mp:
+wildcard range set interfaces mge-[0]/0/[24-47] speed 1g
+
+2mp:
+wildcard range set interfaces mge-[0,1]/0/[24-47] speed 1g
+
+3mp:
+wildcard range set interfaces mge-[0,1,2]/0/[24-47] speed 1g
+
+4mp:
+wildcard range set interfaces mge-[0,1,2,3]/0/[24-47] speed 1g
+
+4mp.sp:
+wildcard range set interfaces mge-[0,1,5,6]/0/[24-47] speed 1g
+
+5mp:
+wildcard range set interfaces mge-[0,1,2,3,4]/0/[24-47] speed 1g
+
+6mp:
+wildcard range set interfaces mge-[0,1,2,3,4,5]/0/[24-47] speed 1g
+
+8mp:
+wildcard range set interfaces mge-[0,1,2,3,4,5,6,7]/0/[24-47] speed 1g

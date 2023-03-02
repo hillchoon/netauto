@@ -1,0 +1,9 @@
+configure
+set firewall family inet filter PROTECT-CTRL-PLANE-IN term PERMIT-NETCONF from source-prefix-list MGMT-HOSTS
+set firewall family inet filter PROTECT-CTRL-PLANE-IN term PERMIT-NETCONF from destination-port 830
+set firewall family inet filter PROTECT-CTRL-PLANE-IN term PERMIT-NETCONF then count netconfcnt
+set firewall family inet filter PROTECT-CTRL-PLANE-IN term PERMIT-NETCONF then accept
+insert firewall family inet filter PROTECT-CTRL-PLANE-IN term PERMIT-NETCONF after term PERMIT-SSH
+set system services netconf ssh port 830
+set policy-options prefix-list MGMT-HOSTS 10.3.0.2/32
+commit

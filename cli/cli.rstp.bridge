@@ -1,0 +1,2 @@
+show spanning-tree bridge | match "Bridge ID"
+show configuration protocols rstp bridge-priority
