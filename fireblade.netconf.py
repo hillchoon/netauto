@@ -35,6 +35,7 @@ def getArgs():
 	arg_cmd.add_argument('-c', '--command', type=str, help='a cli command')
 	arg_cmd.add_argument('-f', '--command_file', metavar="FILE", help='directory of a command file')
 	parser.add_argument('-x', '--switch', choices=['show','config'], default='show', help='function switch: "show(default)" or "config"')
+	parser.add_argument('-r', '--rollback', help='rollback in switch "config"', action='store_true')
 	args = parser.parse_args()
 
 	args_hosts = get_args_in_tuple(args.single_host, args.hosts_list, "host")
@@ -47,7 +48,7 @@ def getArgs():
 	if args.switch not in ['config', 'show']:
 		print ('Function switch "' + args.switch + '" is not defined')
 		sys.exit(1)
-	return hosts, commands, args.switch
+	return hosts, commands, args.switch, args.rollback
 
 def getCredential():
 	credential = ['','']
@@ -68,6 +69,7 @@ def main():
 	hosts = args[0]
 	commands = args[1]
 	switch = args[2]
+	rollback = args[3]
 	uname = credential[0]
 	passwd = credential[1]
 	print (commands)
@@ -97,7 +99,10 @@ def main():
 						host_config.load(command,format='set',ignore_warning=True)
 					if host_config.diff() != None:
 						print (host_config.diff())
-						host_config.commit(ignore_warning=True,timeout=600)
+						if rollback is True:
+							host_config.rollback()
+						else:
+							host_config.commit(ignore_warning=True,timeout=600)
 
 		except ConnectError as err:
 		    print(f"Cannot connect to device: {err}")
