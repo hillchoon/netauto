@@ -1,1 +1,0 @@
-show virtual-chassis | match "FPC 0" | match 48MP

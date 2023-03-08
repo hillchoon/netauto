@@ -1,3 +1,0 @@
-show system uptime
-show interfaces xe-0/2/0 extensive | match "last|error"
-show interfaces xe-1/2/0 extensive | match "last|error"

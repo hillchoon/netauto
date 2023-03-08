@@ -1,7 +1,0 @@
-show configuration vlans | display set | match "1024|4069"
-show configuration firewall family ethernet-switching filter VLAN-AVNET-IN | display set relative
-show configuration firewall family ethernet-switching filter VLAN-AV-IN | display set relative
-show configuration policy-options prefix-list VLAN-AVNET-SUBNETS
-show configuration policy-options prefix-list AVNET-TRUSTED-HOSTS
-show configuration policy-options prefix-list VLAN-AV-SUBNETS
-show configuration policy-options prefix-list AV-TRUSTED-HOSTS

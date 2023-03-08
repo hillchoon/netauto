@@ -1,1 +1,0 @@
-show chassis hardware | match FPC | match "2300|4300"

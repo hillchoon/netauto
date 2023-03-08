@@ -1,3 +1,0 @@
-configure
-wildcard range set interfaces mge-[0,1,2,3]/0/[24-47] speed 1g
-commit
