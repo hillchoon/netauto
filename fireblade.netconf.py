@@ -2,13 +2,12 @@ import sys
 import os
 from pathlib import Path
 import argparse
-sys.path.append('.utils/')
 from getpass import getpass
 from jnpr.junos import Device
 from jnpr.junos.exception import *
 from jnpr.junos.utils.start_shell import StartShell
 from jnpr.junos.utils.config import Config
-import formatter
+from utils import formatter
 
 def get_args_in_tuple(arg_single, arg_file, argtype):
 	result_list = []
