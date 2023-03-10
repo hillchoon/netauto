@@ -2,6 +2,7 @@ import sys
 import os
 from pathlib import Path
 import argparse
+sys.path.append('.utils/')
 from getpass import getpass
 from jnpr.junos import Device
 from jnpr.junos.exception import *
