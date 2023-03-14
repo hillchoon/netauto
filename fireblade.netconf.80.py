@@ -59,7 +59,7 @@ def getCredential():
 	return credential
 
 def netconf(host_name, username, password):
-    dev = Device(host=host_name, user=username, password=password)
+    dev = Device(host=host_name, user=username, password=password, port=80)
     dev.open()
     return dev
 
