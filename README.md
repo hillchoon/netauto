@@ -59,7 +59,7 @@ v1.0<br>
 ```
 usage: fireblade.hardware.probe.py [-h] [-l FILE] [-o FILE]
 
-NETCONF management session to fetch Juniper hardware information
+NETCONF management session to fetch Juniper hardware information. hostname and model in v1.0
 
 optional arguments:
   -h, --help            show this help message and exit
