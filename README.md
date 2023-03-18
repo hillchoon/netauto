@@ -3,7 +3,7 @@ Management Automation on A Juniper Network
 
 **fireblade.netconf.py**
 <br>
-v1.0
+v1.0<br>
 ```
 usage: fireblade.netconf.py [-h] (-H SINGLE_HOST | -l FILE) (-c COMMAND | -f FILE) [-x {show,config}] [-r]
 
@@ -28,7 +28,8 @@ $ pip install junos-eznc
 
 ```
 
-<p style="font-size: 30px;"><strong>fireblade.rootpass.py</strong></p>
+**fireblade.rootpass.py**<br>
+v0.4<br>
 
 ```
 usage: fireblade.rootpass.py [-h] (-H SINGLE_HOST | -l FILE) [-t] [-p {830,80}] [-o FILE]
@@ -53,7 +54,8 @@ $ pip install secrets
 $ pip install passlib
 ```
 
-**fireblade.hardware.probe.py**
+**fireblade.hardware.probe.py**<br>
+v1.0<br>
 ```
 usage: fireblade.hardware.probe.py [-h] [-l FILE] [-o FILE]
 
