@@ -23,5 +23,6 @@ optional arguments:
 Dependency: Python3 standard modules passlib & secrets are required. Intall with pip:
 
 pip install secrets
-pip install passlib```
+pip install passlib
+```
 
