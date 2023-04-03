@@ -29,6 +29,7 @@ def netconf(host_name, username, password, port):
 
 def main():
 	args = get_args()
+
 	# read host file to list hosts
 	with open(f"{args.hosts_list}","r") as fo:
 		hosts = [line.strip() for line in fo.readlines() if not line.startswith('#')]
@@ -41,11 +42,11 @@ def main():
 	with open(f"{args.output}",'a') as fo:
 		for host in hosts:
 			try:
-				with netconf(host, uname, passwd) as dev:
+				with netconf(host, uname, passwd, args.port) as dev:
 					hostname = dev.facts['hostname']
 					model = dev.facts['model']
 
-					data = {'hostname': hostname, 'model': model}
+					data = {"hostname": hostname, "model": model}
 					print (data)
 					fo.write(str(data) + '\n')
 
