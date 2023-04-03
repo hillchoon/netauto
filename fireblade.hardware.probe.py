@@ -17,11 +17,13 @@ def get_args():
 	parser = argparse.ArgumentParser(description = 'NETCONF management session to fetch Juniper hardware information')
 	parser.add_argument('-l', '--hosts_list', metavar="FILE", help='a host list')
 	parser.add_argument('-o', '--output', metavar='FILE', help='output dictionary')
+	parser.add_argument('-p', '--port', choices = ['830', '80'], default = '830', 
+		help='TCP port for NETCONF session. Script uses 830 by default if this option is not set')
 	args = parser.parse_args()
 	return args
 
-def netconf(host_name, username, password):
-    dev = Device(host=host_name, user=username, password=password)
+def netconf(host_name, username, password, port):
+    dev = Device(host=host_name, user=username, password=password, port=port)
     dev.open()
     return dev
 
