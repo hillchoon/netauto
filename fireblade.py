@@ -129,7 +129,7 @@ def main():
 					host_shell = StartShell(dev)
 					host_shell.open()
 					for command in commands:
-						command.append(' | no-more')
+						command += ' | no-more'
 						cli_output = host_shell.run('cli -c "' + command.strip() + '"')[1]
 						trimed_output = formatter.remove_first_last_lines(cli_output)
 						if trimed_output == ['FALSE']:
