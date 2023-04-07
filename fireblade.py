@@ -25,8 +25,8 @@ def getArgs():
 		+ 'otherwise will run on EX4300-48P hosts')
 
 	# option 'mode'
-	parser.add_argument('-m', '--mode', choices=['show','testconfig', 'config'], default='show', 
-		help='command mode: "show(default)", "testconfig" or "config"')
+	parser.add_argument('-m', '--mode', choices=['show','testconfig', 'commit'], default='show', 
+		help='command mode: "show(default)", "testconfig" or "commit"')
 
 	# option 'port' for NETCONF
 	parser.add_argument('-p', '--port', choices = ['830', '80'], default = '830', 
@@ -118,7 +118,7 @@ def main():
 						print (host_config.diff())
 						if mode == 'testconfig':
 							host_config.rollback()
-							print ('Tested config and rolled back.')
+							print ('Changes tested and rolled back.')
 						else:
 							host_config.commit(ignore_warning=True,timeout=600)
 							print ('Changes committed.')
