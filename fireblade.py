@@ -89,14 +89,6 @@ def main():
 	passwd = credential[1]
 	print (commands)
 
-	# session counters
-	cnt_total = hosts.length()
-	cnt_connecterr,	cnt_autherr, cnt_timeout, cnt_refuse, cnt_rpcerr = [0,0,0,0,0]
-
-	# configuration counters
-	if mode != 'show':
-		cnt_commit, cnt_rollback, cnt_commiterr, cnt_nodiff = [0,0,0,0]
-
 	# run commands on each host
 	for host in hosts:
 		print ('\033[1;34m------------------------------------------------\033[0m')
@@ -137,60 +129,32 @@ def main():
 
 								if mode == 'commit':
 									cu.commit(ignore_warning=True,timeout=600)
-									cnt_commit += 1
 									print ('\033[32m' + 'Changes committed.' + '\033[0m')
 								else:
 									cu.rollback()
-									cnt_rollback += 1
 									print ('\033[93;1m' + 'Changes rolled back.' + '\033[0m')
 
 							except CommitError as err:
 								cu.rollback()
-								cnt_commiterr += 1
 								print ('\033[31mError\033[0m in commit check, rolled back with ',err.message)
 						else:
-							cnt_nodiff += 1
 							print ('No differences found.')
 
 		except ConnectError as err:
-			cnt_connecterr += 1
 			print(f"Cannot connect to device: {err}")
 			continue
 		except ConnectAuthError as err:
-			cnt_autherr += 1
 			print(f"Cannot authenticate to device: {err}")
 			continue
 		except ConnectTimeoutError as err:
-			cnt_timeout += 1
 			print(f"Connection to device timed out: {err}")
 			continue
 		except ConnectRefusedError as err:
-			cnt_refuse += 1
 			print(f"Connection to device was refused: {err}, please check NETCONF configuration")
 			continue
 		except RpcError as err:
-			cnt_rpcerr += 1
 			print(f"RPC error: {err}")
 			continue
-
-	# summarize counters
-	cnt_checkered = cnt_total - cnt_autherr - cnt_connecterr - cnt_timeout - cnt_refuse - cnt_rpcerr
-	print ("Session Counter Summary")
-	print (f"Total Number of Sessions:				{cnt_total}")
-	print (f"Connected Sessions:					{cnt_checkered}")
-	print (f"Connection Error Sessions:				{cnt_connecterr}")
-	print (f"Authentication Error Sessions:			{cnt_autherr}")
-	print (f"Timeout Sessions:						{cnt_timeout}")
-	print (f"Connection Refused Sessions:			{cnt_refuse}")
-	print (f"RPC Error Sessions:					{cnt_rpcerr}\n")
-	
-	if mode != 'show':
-		print ("Configuration Change Summary")
-		print (f"Total Number of Change Sessions:		{cnt_total}")
-		print (f"Committed Sessions:					{cnt_commit}")
-		print (f"Rolled Back Sessions:					{cnt_rollback}")
-		print (f"Commit Error Sessions:					{cnt_commiterr}")
-		print (f"No Difference in Change:				{cnt_nodiff}")
 
 if __name__ == '__main__':
 	main()
