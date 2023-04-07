@@ -1,27 +1,28 @@
 # Fireblade Netauto
-Management Automation on A Juniper Network
+A Juniper Network Operations & Management Toolkit
 
-**fireblade.netconf.py**
+**fireblade.py**
 <br>
-v1.0<br>
+v1.2<br>
 ```
-usage: fireblade.netconf.py [-h] (-H SINGLE_HOST | -l FILE) (-c COMMAND | -f FILE) [-x {show,config}] [-r]
+usage: fireblade.py [-h] (-H SINGLE_HOST | -l FILE) (-c COMMAND | -f FILE) [-m {show,testconfig,commit}] [-p {830,80}]
 
-NETCONF management session to Juniper Devices
+General Queries & Configuration Changes Tool
 
 optional arguments:
   -h, --help            show this help message and exit
   -H SINGLE_HOST, --single_host SINGLE_HOST
                         FQDN of a host
   -l FILE, --hosts_list FILE
-                        direcotry of a host list
+                        Direcotry to a list of hosts
   -c COMMAND, --command COMMAND
-                        a cli command
-  -f FILE, --command_file FILE
-                        directory of a command file
-  -x {show,config}, --switch {show,config}
-                        function switch: "show(default)" or "config"
-  -r, --rollback        rollback in switch "config"
+                        A cli command
+  -f FILE, --cmdfile FILE
+                        Directory to a cli command file.
+  -m {show,testconfig,commit}, --mode {show,testconfig,commit}
+                        Operation mode: Default to "show", options of "testconfig" and "commit"
+  -p {830,80}, --port {830,80}
+                        TCP port for NETCONF session. 830 by default otherwise 80
 
 Dependency: junos-eznc
 $ pip install junos-eznc
@@ -50,7 +51,6 @@ optional arguments:
 
 Dependency: Python3 standard modules passlib & secrets are required. Intall with pip:
 
-$ pip install secrets
 $ pip install passlib
 ```
 
