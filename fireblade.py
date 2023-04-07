@@ -10,19 +10,17 @@ from utils import formatter
 # get and process input options
 def getArgs():
 
-	parser = argparse.ArgumentParser(description = 'Fireblade management tool on Juniper Devices')
+	parser = argparse.ArgumentParser(description = 'Fireblade management tool for Juniper Devices')
 	
 	# group arg_host 
 	arg_host = parser.add_mutually_exclusive_group(required=True)
 	arg_host.add_argument('-H', '--single_host', type=str, help='FQDN of a host')
-	arg_host.add_argument('-l', '--hosts_list', metavar="FILE", help='direcotry of a host list')
+	arg_host.add_argument('-l', '--hosts_list', metavar="FILE", help='direcotry to a list of hosts')
 
 	# group arg_cmd
 	arg_cmd = parser.add_mutually_exclusive_group(required=True)
 	arg_cmd.add_argument('-c', '--command', type=str, help='a cli command')
-	arg_cmd.add_argument('-f', '--cmdfile', metavar="FILE", help='directory to a command file.'
-		+ 'when option "-d" is not set, this command file will run on all hosts,'
-		+ 'otherwise will run on EX4300-48P hosts')
+	arg_cmd.add_argument('-f', '--cmdfile', metavar="FILE", help='directory to a command file.')
 
 	# option 'mode'
 	parser.add_argument('-m', '--mode', choices=['show','testconfig', 'commit'], default='show', 
@@ -81,8 +79,8 @@ def main():
 		commands = args[1]
 		mode = args[2]
 		port = args[3]
-	except argparse.ArgumentError as e:
-		print(f"Error: {e}")
+	except argparse.ArgumentError as err:
+		print(f"Error: {err}")
 		return
 
 	# credential
@@ -93,13 +91,17 @@ def main():
 
 	# run commands on each host
 	for host in hosts:
-		print ('------------------------------------------------')
+		print ('\033[1;34m------------------------------------------------\033[0m')
 		print ('HOST: ' + host)
 		try:
 			with netconf(host, uname, passwd, port) as dev:
+
+				# mode dictates
 				if mode == 'show':
 					host_shell = StartShell(dev)
 					host_shell.open()
+
+					# excute commands
 					for command in commands:
 						command += ' | no-more'
 						cli_output = host_shell.run('cli -c "' + command.strip() + '"')[1]
@@ -110,18 +112,33 @@ def main():
 						for line in trimed_output:
 							print (line.strip("\n"))
 					host_shell.close()
+
 				else:
-					host_config = Config(dev, mode='exclusive')
-					for command in commands:
-						host_config.load(command,format='set',ignore_warning=True)
-					if host_config.diff() != None:
-						print (host_config.diff())
-						if mode == 'testconfig':
-							host_config.rollback()
-							print ('Changes tested and rolled back.')
+					with Config(dev, mode='exclusive') as cu:
+
+						# excute commands
+						for command in commands:
+							cu.load(command,format='set',ignore_warning=True)
+
+						if cu.diff() != None:
+							print (cu.diff())
+
+							try:
+								cu.commit_check()
+								print ('\033[32m' + 'Changes passed commit check.' + '\033[0m')
+
+								if mode == 'commit':
+									cu.commit(ignore_warning=True,timeout=600)
+									print ('\033[32m' + 'Changes committed.' + '\033[0m')
+								else:
+									cu.rollback()
+									print ('\033[93;1m' + 'Changes rolled back.' + '\033[0m')
+
+							except CommitError as err:
+								cu.rollback()
+								print ('\033[31mError\033[0m in commit check, rolled back with ',err.message)
 						else:
-							host_config.commit(ignore_warning=True,timeout=600)
-							print ('Changes committed.')
+							print ('No differences found.')
 
 		except ConnectError as err:
 			print(f"Cannot connect to device: {err}")
