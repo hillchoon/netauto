@@ -43,7 +43,7 @@ def getArgs():
 		+ 'otherwise will run on EX4300-48P hosts')
 
 	# option 'mode'
-	parser.add_argument('-m', '--mode', required = True, choices=['show','testconfig', 'config'], default='show', 
+	parser.add_argument('-m', '--mode', choices=['show','testconfig', 'config'], default='show', 
 		help='command mode: "show(default)", "testconfig" or "config"')
 
 	# option 'port' for NETCONF
