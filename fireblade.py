@@ -7,24 +7,6 @@ from jnpr.junos.utils.start_shell import StartShell
 from jnpr.junos.utils.config import Config
 from utils import formatter
 
-# process arguments of hosts and commands
-def get_args_in_tuple(arg_single, arg_file, argtype):
-	result_list = []
-	if arg_single is not None and arg_file is not None:
-		print ('Both a single ' + argtype + ' and a ' + argtype + ' file are provided,')
-		print ('Script can only process one of them, please retry')
-		return False, result_list
-	elif arg_single is None and arg_file is None:
-		print ('Either a single ' + argtype + ' or a ' + argtype + ' file is needed,')
-		print ('Please retry')
-		return False, result_list
-	elif arg_single is None:
-		with open(f"{arg_file}","r") as fo:
-			result_list = [line.strip() for line in fo.readlines() if not line.startswith('#')]
-	else:
-		result_list.append(arg_single.strip())
-	return True, result_list
-
 # get and process input options
 def getArgs():
 
@@ -72,16 +54,6 @@ def getArgs():
 	else:
 		with open(f"{args.cmdfile}", "r") as fo:
 			commands = [line.strip() for line in fo.readlines() if not line.startswith('#')]
-
-#	args_hosts = get_args_in_tuple(args.single_host, args.hosts_list, "host")
-#	args_command = get_args_in_tuple(args.command, args.cmdfile, "command")
-
-#	if args_hosts[0] is True:
-#		hosts = args_hosts[1]
-#	
-#	if args_command[0] is True:
-#		commands =args_command[1]
-#	print (args.mode)
 
 	return hosts, commands, args.mode, args.port
 
@@ -146,8 +118,10 @@ def main():
 						print (host_config.diff())
 						if mode == 'testconfig':
 							host_config.rollback()
+							print ('Tested config and rolled back.')
 						else:
 							host_config.commit(ignore_warning=True,timeout=600)
+							print ('Changes committed.')
 
 		except ConnectError as err:
 			print(f"Cannot connect to device: {err}")
