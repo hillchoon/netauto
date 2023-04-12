@@ -1,9 +1,10 @@
 # Fireblade Netauto
+
 A Juniper Network Operations & Management Toolkit
 
-**fireblade.py**
-<br>
-v1.2<br>
+## fireblade.py
+v1.2
+#### Command Line Options
 ```
 usage: fireblade.py [-h] (-H SINGLE_HOST | -l FILE) (-c COMMAND | -f FILE) [-m {show,testconfig,commit}] [-p {830,80}]
 
@@ -23,15 +24,26 @@ optional arguments:
                         Operation mode: Default to "show", options of "testconfig" and "commit"
   -p {830,80}, --port {830,80}
                         TCP port for NETCONF session. 830 by default otherwise 80
-
-Dependency: junos-eznc
-$ pip install junos-eznc
-
 ```
-
-**fireblade.rootpass.py**<br>
-v0.4<br>
-
+#### Dependency
+```
+$ pip install junos-eznc
+```
+#### Examples 1 - query on a single host
+```
+$ pythno3 ~/netauto/fireblade.py -H <hostname> -c 'show ethernet-switching table vlan-name DATA | except "ae0"'
+```
+#### Example 2 - testing configuration on a number of selected hosts
+```
+$ python3 ~/netauto/fireblade.py -l ~/garage/hosts.list -f ~/garage/cli.adding.vlan.abc -m testconfig
+```
+#### Examle 3 - apply and commit configuration changes on a number of hosts
+```
+$ python3 ~/netauto/fireblade.py -l ~/garage/hosts.list -f ~/garage/cli.update.firewall.xyz -m commit
+```
+## fireblade.rootpass.py
+v0.4
+#### Command Line Options
 ```
 usage: fireblade.rootpass.py [-h] (-H SINGLE_HOST | -l FILE) [-t] [-p {830,80}] [-o FILE]
 
@@ -48,14 +60,15 @@ optional arguments:
                         TCP port for NETCONF session. Script uses 830 by default if this option is not set
   -o FILE, --output FILE
                         directory to output file
-
-Dependency: Python3 standard modules passlib & secrets are required. Intall with pip:
-
+```
+#### Dependency
+Python3 standard modules passlib is required. Intall with pip:
+```
 $ pip install passlib
 ```
-
-**fireblade.hardware.probe.py**<br>
-v1.0<br>
+## fireblade.hardware.probe.py
+v1.0
+#### Command Line Options
 ```
 usage: fireblade.hardware.probe.py [-h] [-l FILE] [-o FILE]
 
