@@ -42,7 +42,7 @@ $ python3 ~/netauto/fireblade.py -l ~/garage/hosts.list -f ~/garage/cli.adding.v
 $ python3 ~/netauto/fireblade.py -l ~/garage/hosts.list -f ~/garage/cli.update.firewall.xyz -m commit
 ```
 ## Hidden switch in a list of host or commands
-All Fireblade Netauto scripts support a hidden switch in a file of a list of hosts or commands. This switch comes in handy when you want the scripts to toggle some of the hosts or commands respectively. To do that, a '#' shall be added at the begining of the line, see examples below:
+All Fireblade Netauto scripts support a hidden switch in a file of a list of hosts or commands. This switch comes in handy when you want the scripts to toggle some of the hosts or commands without having to delete them. To do that, a '#' shall be added at the begining of the line, see examples below:
 ```
 $ cat ~/garage/hosts.campus.a
 host1.com
