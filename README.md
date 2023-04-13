@@ -3,7 +3,7 @@
 A Juniper Network Operations & Management Toolkit
 
 ## fireblade.py
-v1.2
+v1.2.2
 #### Command Line Options
 ```
 usage: fireblade.py [-h] (-H SINGLE_HOST | -l FILE) (-c COMMAND | -f FILE) [-m {show,testconfig,commit}] [-p {830,80}]
