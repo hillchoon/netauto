@@ -1,36 +1,66 @@
 # Fireblade Netauto
-Management Automation on A Juniper Network
 
-**fireblade.netconf.py**
-<br>
-v1.0<br>
+A Juniper Network Operations & Management Toolkit
+
+## fireblade.py
+v1.2.2
+#### Command Line Options
 ```
-usage: fireblade.netconf.py [-h] (-H SINGLE_HOST | -l FILE) (-c COMMAND | -f FILE) [-x {show,config}] [-r]
+usage: fireblade.py [-h] (-H SINGLE_HOST | -l FILE) (-c COMMAND | -f FILE) [-m {show,testconfig,commit}] [-p {830,80}]
 
-NETCONF management session to Juniper Devices
+General Queries & Configuration Changes Tool
 
 optional arguments:
   -h, --help            show this help message and exit
   -H SINGLE_HOST, --single_host SINGLE_HOST
                         FQDN of a host
   -l FILE, --hosts_list FILE
-                        direcotry of a host list
+                        Direcotry to a list of hosts
   -c COMMAND, --command COMMAND
-                        a cli command
-  -f FILE, --command_file FILE
-                        directory of a command file
-  -x {show,config}, --switch {show,config}
-                        function switch: "show(default)" or "config"
-  -r, --rollback        rollback in switch "config"
-
-Dependency: junos-eznc
+                        A cli command
+  -f FILE, --cmdfile FILE
+                        Directory to a cli command file.
+  -m {show,testconfig,commit}, --mode {show,testconfig,commit}
+                        Operation mode: Default to "show", options of "testconfig" and "commit"
+  -p {830,80}, --port {830,80}
+                        TCP port for NETCONF session. 830 by default otherwise 80
+```
+#### Dependency
+```
 $ pip install junos-eznc
-
+```
+#### Examples 1 - query on a single host
+```
+$ pythno3 ~/netauto/fireblade.py -H <hostname> -c 'show ethernet-switching table vlan-name DATA | except "ae0"'
+```
+#### Example 2 - testing configuration on a number of selected hosts
+```
+$ python3 ~/netauto/fireblade.py -l ~/garage/hosts.list -f ~/garage/cli.adding.vlan.abc -m testconfig
+```
+#### Examle 3 - apply and commit configuration changes on a number of hosts
+```
+$ python3 ~/netauto/fireblade.py -l ~/garage/hosts.list -f ~/garage/cli.update.firewall.xyz -m commit
+```
+## Hidden switch in a list of host or commands
+All Fireblade Netauto scripts support a hidden switch in a file of a list of hosts or commands. This switch comes in handy when you want the scripts to toggle some of the hosts or commands without having to delete them. To do that, a '#' shall be added at the begining of the line, see examples below:
+```
+$ cat ~/garage/hosts.campus.a
+host1.com
+host2.com
+#host3.com
+host4.com
+$ cat ~/garage/cli.show
+show system information
+show interfaces terse irb
+show ethernet-switching table
+#show system uptime
+show spanning-tree statistics interface
+$
 ```
 
-**fireblade.rootpass.py**<br>
-v0.4<br>
-
+## fireblade.rootpass.py
+v0.4
+#### Command Line Options
 ```
 usage: fireblade.rootpass.py [-h] (-H SINGLE_HOST | -l FILE) [-t] [-p {830,80}] [-o FILE]
 
@@ -47,15 +77,15 @@ optional arguments:
                         TCP port for NETCONF session. Script uses 830 by default if this option is not set
   -o FILE, --output FILE
                         directory to output file
-
-Dependency: Python3 standard modules passlib & secrets are required. Intall with pip:
-
-$ pip install secrets
+```
+#### Dependency
+Python3 standard modules passlib is required. Intall with pip:
+```
 $ pip install passlib
 ```
-
-**fireblade.hardware.probe.py**<br>
-v1.0<br>
+## fireblade.hardware.probe.py
+v1.0
+#### Command Line Options
 ```
 usage: fireblade.hardware.probe.py [-h] [-l FILE] [-o FILE]
 
