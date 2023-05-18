@@ -65,63 +65,56 @@ def getCredential():
     credential[1] = passwd
     return credential
 
-def pbanner(host):
-    print('\033[1;34m------------------------------------------------\033[0m')
-    print('HOST: ' + host)
-
+# netconf session
 def ncsession(host, commands, mode, uname, passwd):
     try:
         with Device(host=host, user=uname, password=passwd) as dev:
-            dev.open()
+            print_out = f"\033[1;34m------------------------------------------------\033[0m\nHost: {host}\n"
             
             # mode dictates
             if mode == 'show':
                 host_shell = StartShell(dev)
                 host_shell.open()
-                print_out = ''
 
                 # excute commands
                 for command in commands:
+
                     command += ' | no-more'
                     cli_output = host_shell.run('cli -c "' + command.strip() + '"')[1]
-                    trimed_output = formatter.remove_first_last_lines(cli_output)
-                    if trimed_output == ['FALSE']:
-#                        print('Output of command ' + '"' + command + '"' + ' on host ' + host
-#                        + ' is corrupted by syslog message')
-                        print_out = 'Output of command ' + '"' + command + '"' + ' on host ' + host 
-                        + ' is corrupted by syslog message'
-                        break
+                    trimed_output = formatter.pop_first_last_lines(cli_output)
+
+                    # reassemble output
                     for line in trimed_output:
-#                        print(line.strip("\n"))
-                        print_out += line.strip() + "\n"
+                        print_out += line + "\n"
+
                 host_shell.close()
-                pbanner(host)
                 print (print_out)
 
             else:
                 with Config(dev, mode='exclusive') as cu:
-                    pbanner(host)
 
                     # excute commands
                     for command in commands:
                         cu.load(command, format='set', ignore_warning=True)
+
                     if cu.diff() != None:
-                        print(cu.diff())
+                        print_out += f'{host} {cu.diff()}\n'
                         try:
                             cu.commit_check(timeout=600)
-                            print('\033[32m' + 'Changes passed commit check.' + '\033[0m')
+                            print_out += '\033[32m' + 'Changes passed commit check.' + '\033[0m\n'
                             if mode == 'commit':
                                 cu.commit(ignore_warning=True, timeout=600)
-                                print('\033[32m' + 'Changes committed.' + '\033[0m')
+                                print_out += '\033[32m' + 'Changes committed.' + '\033[0m\n'
                             else:
                                 cu.rollback()
-                                print('\033[93;1m' + 'Changes rolled back.' + '\033[0m')
+                                print_out += '\033[93;1m' + 'Changes rolled back.' + '\033[0m\n'
                         except CommitError as err:
                             cu.rollback()
-                            print('\033[31mError\033[0m in commit check, rolled back with ', 
-                                err.message)
+                            print_out += f'\033[31mError\033[0m in commit check, rolled back with {err.message}'
                     else:
                         print('No differences found.')
+
+                    print (print_out)
 
     except ConnectError as err:
         print(f"Cannot connect to device: {err}")
@@ -154,7 +147,7 @@ def main():
     print (commands)
 
     # run commands on each host in parallel
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=50) as executor:
         futures = [executor.submit(ncsession, host, commands, mode, uname, passwd) 
         for host in hosts]
         concurrent.futures.wait(futures)
