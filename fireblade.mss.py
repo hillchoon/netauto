@@ -15,12 +15,14 @@ def getArgs():
     
     # group arg_host 
     arg_host = parser.add_mutually_exclusive_group(required=True)
-    arg_host.add_argument('-H', '--single_host', type=str, help='FQDN of a host')
-    arg_host.add_argument('-l', '--hosts_list', metavar="FILE", help='Direcotry to a list of hosts')
+    arg_host.add_argument('-H', '--hosts', nargs='+', 
+        help='hosts\' FQDN in format of \'host1\' \'host2\'...single and double quote function the same')
+    arg_host.add_argument('-l', '--host_list', metavar="FILE", help='Direcotry to a list of hosts')
 
     # group arg_cmd
     arg_cmd = parser.add_mutually_exclusive_group(required=True)
-    arg_cmd.add_argument('-c', '--command', type=str, help='A cli command')
+    arg_cmd.add_argument('-c', '--commands', nargs='+', 
+        help='command(s) in format of "command 1" "command 2"...single and double quote function the same')
     arg_cmd.add_argument('-f', '--cmdfile', metavar="FILE", help='Directory to a cli command file.')
 
     # option 'mode'
@@ -44,23 +46,23 @@ def getArgs():
 
     # process group arg_host
     hosts = []
-    if args.hosts_list and args.single_host:
-        parser.error("Only one of these two options --hosts_list or --single_host is allowed")
-    elif args.hosts_list is None:
-        hosts.append(args.single_host.strip())
-    else:
-        with open(f"{args.hosts_list}", "r") as fo:
+    if args.host_list and args.hosts:
+        parser.error("Only one of these two options --host_list or --hosts is allowed")
+    elif args.host_list:
+        with open(f"{args.host_list}", "r") as fo:
             hosts = [line.strip() for line in fo.readlines() if not line.startswith('#')]
-
+    else:
+        hosts = args.hosts
+        
     # process group arg_cmd
     commands = []
-    if args.cmdfile and args.command:
+    if args.cmdfile and args.commands:
         parser.error("Only one of these two options --cmdfile or --command is allowed")
-    elif args.cmdfile is None:
-        commands.append(args.command.strip())
-    else:
+    elif args.cmdfile:
         with open(f"{args.cmdfile}", "r") as fo:
             commands = [line.strip() for line in fo.readlines() if not line.startswith('#')]
+    else:
+        commands = args.commands
 
     return hosts, commands, args.mode, args.model, args.role #, args.port
 
