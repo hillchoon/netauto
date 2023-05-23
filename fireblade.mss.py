@@ -41,6 +41,10 @@ def getArgs():
         'Default to "edge" for regular edge switches. Other choices are "core", "ext" for extension switches, ' + 
         '"dc" for data centre switches, and "mgmt" for management switches.')
 
+    # option 'campus'
+    parser.add_argument('-p', '--campus', choices=['bby', 'sry', 'van'],
+        help='Campus: self-explanatory')
+
     # take available options
     args = parser.parse_args()
 
@@ -64,7 +68,7 @@ def getArgs():
     else:
         commands = args.commands
 
-    return hosts, commands, args.mode, args.model, args.role #, args.port
+    return hosts, commands, args.mode, args.model, args.role, args.campus #, args.port
 
 # process credential
 def getCredential():
@@ -76,12 +80,20 @@ def getCredential():
     return credential
 
 # netconf session
-def ncsession(host, model, role, commands, mode, uname, passwd):
+def ncsession(host, campus, model, role, commands, mode, uname, passwd):
 
     try:
         with Device(host=host, user=uname, password=passwd) as dev:
 
+            # where a host starts
             print_out = f"\033[1;34m------------------------------------------------\033[0m\nHost: {host}\n"
+
+            # flow control by campus
+            #camp = fireblade_hw.campus(dev)
+            if campus is not None and campus != fireblade_hw.campus(dev):
+                print_out += f"\nThis host is not on desired campus {campus.upper()}, skipping."
+                print (print_out)
+                return
             
             # mode dictates
             if mode == 'show':
@@ -111,11 +123,11 @@ def ncsession(host, model, role, commands, mode, uname, passwd):
 
                 # skip change on mis-matched model
                 if model == 'EX4300-48MP' and fireblade_hw.model(dev) != model:
-                    print_out += "\nThis host is not in the same chassis model these changes are proposed to apply on, skipping changes."
+                    print_out += "\nThis host is not in the same chassis model which changes are proposed to, skipping changes."
                     print (print_out)
                     return
                 if model == 'EX4300-48P' and fireblade_hw.model(dev) == 'EX4300-48MP':
-                    print_out += "\nThis host is not in the same chassis model these changes are proposed to apply on, skipping changes."
+                    print_out += "\nThis host is not in the same chassis model which changes are proposed to, skipping changes."
                     print (print_out)
                     return
 
@@ -167,6 +179,7 @@ def main():
         mode = args[2]
         model = args[3]
         role = args[4]
+        campus = args[5]
     except argparse.ArgumentError as err:
         print(f"Error: {err}")
         return
@@ -181,7 +194,7 @@ def main():
 
     # run commands on each host in parallel
     with concurrent.futures.ThreadPoolExecutor(max_workers=50) as executor:
-        futures = [executor.submit(ncsession, host, chassis_model, role, commands, mode, uname, passwd) 
+        futures = [executor.submit(ncsession, host, campus, chassis_model, role, commands, mode, uname, passwd) 
         for host in hosts]
         concurrent.futures.wait(futures)
 
