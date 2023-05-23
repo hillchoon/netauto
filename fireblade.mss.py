@@ -53,7 +53,7 @@ def getArgs():
             hosts = [line.strip() for line in fo.readlines() if not line.startswith('#')]
     else:
         hosts = args.hosts
-        
+
     # process group arg_cmd
     commands = []
     if args.cmdfile and args.commands:
@@ -91,8 +91,7 @@ def ncsession(host, model, role, commands, mode, uname, passwd):
                 # excute commands
                 for command in commands:
 
-                    command += ' | no-more'
-                    cli_output = host_shell.run('cli -c "' + command.strip() + '"')[1]
+                    cli_output = host_shell.run(f"cli -c '{command} | no-more'")[1]
                     trimed_output = formatter.pop_first_last_lines(cli_output)
 
                     # reassemble output
