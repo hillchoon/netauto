@@ -1,11 +1,48 @@
-# Fireblade Netauto
+# Netauto
 
-A Juniper Network Operations & Management Toolkit
+A set of Python3 tools developed to manage and operate Juniper Network equipment on network operations.
 
-## fireblade.ms.py
+## 1. You as A User
+### 1.1 A NOC User
+A Netauto's Runtime Environment should be ready for a NOC suer to perform operation and management tasks on the managed network hosts - Juniper Network equipment. 
+Netauto's Runtime Environment includes:  
+1) A management server granted with SSH and NETCONF access to production network.  
+2) Necessary software and libaries installed on the management server. Those software and libraries are Python3 and its libraries, Netauto, Juniper Network Junos PyEZ Python Library, and some third-party libraries. Besides Netauto, these software and libraries should be installed and updated to latest versions by a sudo user of the management server. Netauto is installed and updated by NOC user with below commands. **NOTE**: please keep Netauto updated to the latest version.  
+```
+# installation:
+$ git clone https://github.com/hillchoon/netauto
+
+# update:
+$ cd netauto
+$ git pull
+$ cd
+```
+4) A noc user is granted with read-only acces to a list of managed network hosts on the production network. This list is created and maintained by a sudo user, and it could be a text file with hosts' IP address or FQDN.  
+5) Managed network hosts shall be configured to allow SSH and NETCONF sessions initiated from management server.
+### 1.2 A SUDO User
+1) Installs Python3, Junos PyEZ, and other third-party libraries (listed per Netauto script if any depedency).  
+```
+$ pip3 install junos-eznc
+```
+2) Create and maintain a text list of managed network hosts, place the list in a directory to which NOC users are granted with read-only access.
+## 2. Common Command Line Arguments
+A common command line to launch a Netauto script is:
+```
+$ python3 <directory-of-a-netauto-script> <argument-of-managed-hosts> <argument-of-commands> <other-arguments>
+```
+**argument-of-managed-hosts**  
+This argument could be:  
+1) the directory to a text file of hosts' IP or FQDN. i.e. ~/garage/hosts.all, or  
+2) a list of FQDN of hosts with a space in between. i.e. host1.domain.com host2.domain.com host3.domain.com  
+**argument-of-commands**  
+Netauto drives different features for pulling information and pushing configuration changes, therefore this arugument is for either query or configuration, not a mix of both.  
+This argument could be:
+1) the directory to a text file of JUNOS commands, or  
+2) a list of quoted commands with a space in between. i.e. 'show system information | match "keyword"' 'show system uptime' 'show interfaces ge-0/0/0 extensive | match "error"'
+## 3. fireblade.mss
 v0.82\
 It is happening, **simultaneously**! \
-ms is short for multiple sessions. With current setting, **fireblade.ms.py** initiates 50 sessions simultaneously from management host to managed hosts at a time.\
+Introducing fireblade.mss for **m**ultiple **s**ession**s**. In current setting, **fireblade.mss** initiates 50 sessions simultaneously from management server to managed hosts at a time.\
 See output below from '-h' for command line options.
 
 #### Command Line Options
@@ -25,28 +62,27 @@ optional arguments:
   -l FILE, --host_list FILE
                         Direcotry to a list of hosts
   -c COMMANDS [COMMANDS ...], --commands COMMANDS [COMMANDS ...]
-                        command(s) in format of "command 1" "command
-                        2"...single and double quote function the same
+                        command(s) in format of "command1" "command2"...single
+                        and double quote function the same
   -f FILE, --cmdfile FILE
                         Directory to a cli command file.
   -m {show,testconfig,commit}, --mode {show,testconfig,commit}
                         Operation mode: Default to "show", options of
                         "testconfig" and "commit"
-  -d {g,p,mp}, --model {g,p,mp}
-                        Chassis model: This option is only needed when
-                        operation mode is "testconfig" or "commit". Default to
-                        "g" for "general" when proposing changes are
-                        irrelevant to chassis model,other choices are "p" for
-                        "EX4300-48P" and "mp" for "EX4300-48MP"
-  -r {core,edge,dc,ext,mgmt}, --role {core,edge,dc,ext,mgmt}
-                        Chassis role: This option is only needed when
-                        operation mode is "testconfig" or "commit". Default to
-                        "edge" for regular edge switches. Other choices are
-                        "core", "ext" for extension switches, "dc" for data
-                        centre switches, and "mgmt" for management switches.
   -p {bby,sry,van}, --campus {bby,sry,van}
-                        Campus: self-explanatory
-
+                        Campus: self-explanatory. All campuses are covered if
+                        no option of campus is provided
+  -r {all,core,edge,dc,ext,mgmt}, --role {all,core,edge,dc,ext,mgmt}
+                        Chassis role: Default to "all" for all chassis. Other
+                        choices are: "core" for CORE switches; "edge" for EDGE
+                        switches; "ext" for EXTENSION switches; "dc" for
+                        DATACENTRE switches, and "mgmt" for MANAGEMENT
+                        network.
+  -d {all,c,p,mp,m}, --model {all,c,p,mp,m}
+                        Chassis model: Default to "all" for all models,other
+                        choices are "c" for "EX2300-C-12P", "p" for
+                        "EX4300-48P/EX2300", "mp" for "EX4300-48MP",and "m"
+                        for manual input
 ```
 
 ## fireblade.py
