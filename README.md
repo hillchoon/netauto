@@ -2,6 +2,53 @@
 
 A Juniper Network Operations & Management Toolkit
 
+## fireblade.ms.py
+v0.82\
+It is happening, **simultaneously**! \
+ms is short for multiple sessions. With current setting, **fireblade.ms.py** initiates 50 sessions simultaneously from management host to managed hosts at a time.\
+See output below from '-h' for command line options.
+
+#### Command Line Options
+```
+usage: fireblade.mss.py [-h] (-H HOSTS [HOSTS ...] | -l FILE)
+                        (-c COMMANDS [COMMANDS ...] | -f FILE)
+                        [-m {show,testconfig,commit}] [-d {g,p,mp}]
+                        [-r {core,edge,dc,ext,mgmt}] [-p {bby,sry,van}]
+
+General Queries & Configuration Changes Tool
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -H HOSTS [HOSTS ...], --hosts HOSTS [HOSTS ...]
+                        hosts' FQDN in format of 'host1' 'host2'...single and
+                        double quote function the same
+  -l FILE, --host_list FILE
+                        Direcotry to a list of hosts
+  -c COMMANDS [COMMANDS ...], --commands COMMANDS [COMMANDS ...]
+                        command(s) in format of "command 1" "command
+                        2"...single and double quote function the same
+  -f FILE, --cmdfile FILE
+                        Directory to a cli command file.
+  -m {show,testconfig,commit}, --mode {show,testconfig,commit}
+                        Operation mode: Default to "show", options of
+                        "testconfig" and "commit"
+  -d {g,p,mp}, --model {g,p,mp}
+                        Chassis model: This option is only needed when
+                        operation mode is "testconfig" or "commit". Default to
+                        "g" for "general" when proposing changes are
+                        irrelevant to chassis model,other choices are "p" for
+                        "EX4300-48P" and "mp" for "EX4300-48MP"
+  -r {core,edge,dc,ext,mgmt}, --role {core,edge,dc,ext,mgmt}
+                        Chassis role: This option is only needed when
+                        operation mode is "testconfig" or "commit". Default to
+                        "edge" for regular edge switches. Other choices are
+                        "core", "ext" for extension switches, "dc" for data
+                        centre switches, and "mgmt" for management switches.
+  -p {bby,sry,van}, --campus {bby,sry,van}
+                        Campus: self-explanatory
+
+```
+
 ## fireblade.py
 v1.2.2
 #### Command Line Options
