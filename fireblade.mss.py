@@ -22,33 +22,33 @@ def getArgs():
     # group arg_cmd
     arg_cmd = parser.add_mutually_exclusive_group(required=True)
     arg_cmd.add_argument('-c', '--commands', nargs='+', 
-        help='command(s) in format of "command 1" "command 2"...single and double quote function the same')
+        help='command(s) in format of "command1" "command2"...single and double quote function the same')
     arg_cmd.add_argument('-f', '--cmdfile', metavar="FILE", help='Directory to a cli command file.')
 
     # option 'mode'
     parser.add_argument('-m', '--mode', choices=['show','testconfig', 'commit'], default='show', 
         help='Operation mode: Default to "show", options of "testconfig" and "commit"')
 
-    # option 'model'
-    parser.add_argument('-d', '--model', choices=['g', 'p', 'mp'], default='general',
-        help='Chassis model: This option is only needed when operation mode is "testconfig" or "commit". ' + 
-        'Default to "g" for "general" when proposing changes are irrelevant to chassis model,' +
-        'other choices are "p" for "EX4300-48P" and "mp" for "EX4300-48MP"')
-
-    # option 'role'
-    parser.add_argument('-r', '--role', choices=['core', 'edge', 'dc', 'ext', 'mgmt'], default='edge',
-        help='Chassis role: This option is only needed when operation mode is "testconfig" or "commit". ' + 
-        'Default to "edge" for regular edge switches. Other choices are "core", "ext" for extension switches, ' + 
-        '"dc" for data centre switches, and "mgmt" for management switches.')
-
     # option 'campus'
     parser.add_argument('-p', '--campus', choices=['bby', 'sry', 'van'],
-        help='Campus: self-explanatory')
+        help='Campus: self-explanatory. All campuses are covered if no option of campus is provided')
 
-    # take available options
+    # option 'role'
+    parser.add_argument('-r', '--role', default='all', 
+        choices=['all', 'core', 'edge', 'dc', 'ext', 'mgmt'], 
+        help='Chassis role: Default to "all" for all chassis. Other choices are: "core" for CORE switches; "edge" for EDGE switches; "ext" for EXTENSION switches; ' + 
+        '"dc" for DATACENTRE switches, and "mgmt" for MANAGEMENT network.')
+
+    # option 'model'
+    parser.add_argument('-d', '--model', default='a', choices=['all', 'c', 'p', 'mp', 'm'], 
+        help='Chassis model: Default to "all" for all models,' +
+        'other choices are "c" for "EX2300-C-12P", "p" for "EX4300-48P/EX2300", "mp" for "EX4300-48MP",' +
+        'and "m" for manual input')
+
+    # start of taking and processing args
     args = parser.parse_args()
 
-    # process group arg_host
+    # group arg_host
     hosts = []
     if args.host_list and args.hosts:
         parser.error("Only one of these two options --host_list or --hosts is allowed")
@@ -58,7 +58,7 @@ def getArgs():
     else:
         hosts = args.hosts
 
-    # process group arg_cmd
+    # group arg_cmd
     commands = []
     if args.cmdfile and args.commands:
         parser.error("Only one of these two options --cmdfile or --command is allowed")
@@ -68,7 +68,10 @@ def getArgs():
     else:
         commands = args.commands
 
-    return hosts, commands, args.mode, args.model, args.role, args.campus #, args.port
+    # model
+    model = 'all' if args.model == 'all' else 'EX4300-48P' if args.model == 'p' else 'EX4300-48MP' if args.model == 'mp' else 'EX2300-C-12P' if args.model == 'c' else input("Please key in specific model: ") if args.model == 'm' else None
+    
+    return hosts, commands, args.mode, model, args.role, args.campus #, args.port
 
 # process credential
 def getCredential():
@@ -85,13 +88,28 @@ def ncsession(host, campus, model, role, commands, mode, uname, passwd):
     try:
         with Device(host=host, user=uname, password=passwd) as dev:
 
-            # where a host starts
+            # where it starts for a host
             print_out = f"\033[1;34m------------------------------------------------\033[0m\nHost: {host}\n"
 
-            # flow control by campus
-            #camp = fireblade_hw.campus(dev)
-            if campus is not None and campus != fireblade_hw.campus(dev):
-                print_out += f"\nThis host is not on desired campus {campus.upper()}, skipping."
+            # on/off switch of campus, role and model
+            # campus
+            camp = fireblade_hw.campus(dev)
+            if campus is not None and campus != camp:
+                print_out += f"\nThis host is on campus {camp.upper()}, campus mismatched, skipping"
+                print (print_out)
+                return
+
+            # role
+            r = fireblade_hw.role(dev)
+            if role != 'all' and role != r:
+                print_out += f"\nThis host is a '{r.upper()}' switch, chassis role mismatched, skipping."
+                print (print_out)
+                return
+
+            # model
+            m = fireblade_hw.model(dev)
+            if model != 'all' and model != m:
+                print_out += f"\nThis host is an '{m.upper()}' chassis, model mismatched, skipping."
                 print (print_out)
                 return
             
@@ -114,13 +132,6 @@ def ncsession(host, campus, model, role, commands, mode, uname, passwd):
                 print (print_out)
 
             else:
-
-                # skip change on mis-matched role
-                if fireblade_hw.role(dev) != role:
-                    print_out += f"\nThis host is not a '{role}'' switch, skipping changes."
-                    print (print_out)
-                    return
-
                 # skip change on mis-matched model
                 if model == 'EX4300-48MP' and fireblade_hw.model(dev) != model:
                     print_out += "\nThis host is not in the same chassis model which changes are proposed to, skipping changes."
@@ -188,13 +199,12 @@ def main():
     credential = getCredential()
     uname = credential[0]
     passwd = credential[1]
-    print (commands)
 
-    chassis_model = 'general' if model == 'g' else 'EX4300-48P' if model == 'p' else 'EX4300-48MP' if model == 'mp' else None
+    print (commands)
 
     # run commands on each host in parallel
     with concurrent.futures.ThreadPoolExecutor(max_workers=50) as executor:
-        futures = [executor.submit(ncsession, host, campus, chassis_model, role, commands, mode, uname, passwd) 
+        futures = [executor.submit(ncsession, host, campus, model, role, commands, mode, uname, passwd) 
         for host in hosts]
         concurrent.futures.wait(futures)
 
