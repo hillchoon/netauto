@@ -40,7 +40,7 @@ def getArgs():
         '"dc" for DATACENTRE switches, and "mgmt" for MANAGEMENT network.')
 
     # option 'model'
-    parser.add_argument('-d', '--model', default='a', choices=['all', 'c', 'p', 'mp', 'm'], 
+    parser.add_argument('-d', '--model', default='all', choices=['all', 'c', 'p', 'mp', 'm'], 
         help='Chassis model: Default to "all" for all models,' +
         'other choices are "c" for "EX2300-C-12P", "p" for "EX4300-48P/EX2300", "mp" for "EX4300-48MP",' +
         'and "m" for manual input')
