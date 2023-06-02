@@ -45,7 +45,10 @@ def getArgs():
         'other choices are "c" for "EX2300-C-12P", "p" for "EX4300-48P/EX2300", "mp" for "EX4300-48MP",' +
         'and "m" for manual input')
 
-    # start of taking and processing args
+    parser.add_argument('-s', '--silencer', action="store_false",
+        help='Silence the output when hosts don\'t match given criteria')
+
+    # start taking and processing args
     args = parser.parse_args()
 
     # group arg_host
@@ -71,7 +74,7 @@ def getArgs():
     # model
     model = 'all' if args.model == 'all' else 'EX4300-48P' if args.model == 'p' else 'EX4300-48MP' if args.model == 'mp' else 'EX2300-C-12P' if args.model == 'c' else input("Please key in specific model: ") if args.model == 'm' else None
     
-    return hosts, commands, args.mode, model, args.role, args.campus #, args.port
+    return hosts, commands, args.mode, model, args.role, args.campus, args.silencer #, args.port
 
 # process credential
 def getCredential():
@@ -83,7 +86,7 @@ def getCredential():
     return credential
 
 # netconf session
-def ncsession(host, campus, model, role, commands, mode, uname, passwd):
+def ncsession(host, campus, model, role, commands, mode, uname, passwd, si):
 
     try:
         with Device(host=host, user=uname, password=passwd) as dev:
@@ -96,21 +99,21 @@ def ncsession(host, campus, model, role, commands, mode, uname, passwd):
             camp = fireblade_hw.campus(dev)
             if campus is not None and campus != camp:
                 print_out += f"\nThis host is on campus {camp.upper()}, campus mismatched, skipping"
-                print (print_out)
+                print (print_out) if si else None
                 return
 
             # role
             r = fireblade_hw.role(dev)
             if role != 'all' and role != r:
                 print_out += f"\nThis host is a '{r.upper()}' switch, chassis role mismatched, skipping."
-                print (print_out)
+                print (print_out) if si else None
                 return
 
             # model
             m = fireblade_hw.model(dev)
             if model != 'all' and model != m:
                 print_out += f"\nThis host is an '{m.upper()}' chassis, model mismatched, skipping."
-                print (print_out)
+                print (print_out) if si else None
                 return
             
             # mode dictates
@@ -191,6 +194,7 @@ def main():
         model = args[3]
         role = args[4]
         campus = args[5]
+        silencer = args[6]
     except argparse.ArgumentError as err:
         print(f"Error: {err}")
         return
@@ -204,7 +208,7 @@ def main():
 
     # run commands on each host in parallel
     with concurrent.futures.ThreadPoolExecutor(max_workers=50) as executor:
-        futures = [executor.submit(ncsession, host, campus, model, role, commands, mode, uname, passwd) 
+        futures = [executor.submit(ncsession, host, campus, model, role, commands, mode, uname, passwd, silencer) 
         for host in hosts]
         concurrent.futures.wait(futures)
 
