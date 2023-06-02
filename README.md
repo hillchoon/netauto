@@ -4,7 +4,7 @@ A set of Python3 tools developed to manage and operate Juniper Network equipment
 
 ## 1. You as A User
 ### 1.1 A NOC User
-A Netauto's Runtime Environment should be ready for a NOC suer to perform operation and management tasks on the managed network hosts - Juniper Network equipment. 
+A Netauto's Runtime Environment should be ready for a NOC user to perform operation and management tasks on the managed network hosts - Juniper Network equipment. 
 Netauto's Runtime Environment includes:  
 1) A management server granted with SSH and NETCONF access to production network.  
 2) Necessary software and libaries installed on the management server. Those software and libraries are Python3 and its libraries, Netauto, Juniper Network Junos PyEZ Python Library, and some third-party libraries. Besides Netauto, these software and libraries should be installed and updated to latest versions by a sudo user of the management server. Netauto is installed and updated by NOC user with below commands. **NOTE**: please keep Netauto updated to the latest version.  
@@ -17,7 +17,7 @@ $ cd netauto
 $ git pull
 $ cd
 ```
-4) A noc user is granted with read-only acces to a list of managed network hosts on the production network. This list is created and maintained by a sudo user, and it could be a text file with hosts' IP address or FQDN.  
+4) A NOC user is granted with read-only acces to a list of managed network hosts on the production network. This list is created and maintained by a sudo user, and it could be a text file with hosts' IP address or FQDN.  
 5) Managed network hosts shall be configured to allow SSH and NETCONF sessions initiated from management server.
 ### 1.2 A SUDO User
 1) Installs Python3, Junos PyEZ, and other third-party libraries (listed per Netauto script if any depedency).  
@@ -34,60 +34,67 @@ $ python3 <directory-of-a-netauto-script> <argument-of-managed-hosts> <argument-
 This argument could be:  
 1) the directory to a text file of hosts' IP or FQDN. i.e. ~/garage/hosts.all, or  
 2) a list of FQDN of hosts with a space in between. i.e. host1.domain.com host2.domain.com host3.domain.com  
+
 **argument-of-commands**  
 Netauto drives different features for pulling information and pushing configuration changes, therefore this arugument is for either query or configuration, not a mix of both.  
 This argument could be:
 1) the directory to a text file of JUNOS commands, or  
 2) a list of quoted commands with a space in between. i.e. 'show system information | match "keyword"' 'show system uptime' 'show interfaces ge-0/0/0 extensive | match "error"'
 ## 3. fireblade.mss
-v0.82\
+v0.85\
 It is happening, **simultaneously**! \
-Introducing fireblade.mss for **m**ultiple **s**ession**s**. In current setting, **fireblade.mss** initiates 50 sessions simultaneously from management server to managed hosts at a time.\
-See output below from '-h' for command line options.
+Introducing fireblade.mss for **m**ultiple **s**ession**s**.
+### Key Features:
+1) 50 simultaneous sessions from management server to managed hosts at a time;
+2) Flexible input of multiple hosts and commands as command line arguments;
+3) Filter target hosts with arguments of campus, role, chassis model;
+4) Silencer to mute output for hosts that mismatch given creteria.
+See details below from command line option '-h'.
 
-#### Command Line Options
+### Command Line Options
 ```
-usage: fireblade.mss.py [-h] (-H HOSTS [HOSTS ...] | -l FILE)
-                        (-c COMMANDS [COMMANDS ...] | -f FILE)
-                        [-m {show,testconfig,commit}] [-d {g,p,mp}]
-                        [-r {core,edge,dc,ext,mgmt}] [-p {bby,sry,van}]
+usage: fireblade.mss.py [-h] (-H HOSTS [HOSTS ...] | -l FILE) (-c COMMANDS [COMMANDS ...] | -f FILE) [-m {show,testconfig,commit}] [-p {bby,sry,van}] [-r {all,core,edge,dc,ext,mgmt}]
+                        [-d {all,c,p,mp,m}] [-s]
 
 General Queries & Configuration Changes Tool
 
 optional arguments:
   -h, --help            show this help message and exit
   -H HOSTS [HOSTS ...], --hosts HOSTS [HOSTS ...]
-                        hosts' FQDN in format of 'host1' 'host2'...single and
-                        double quote function the same
+                        hosts' FQDN in format of 'host1' 'host2'...single and double quote function the same
   -l FILE, --host_list FILE
                         Direcotry to a list of hosts
   -c COMMANDS [COMMANDS ...], --commands COMMANDS [COMMANDS ...]
-                        command(s) in format of "command1" "command2"...single
-                        and double quote function the same
+                        command(s) in format of "command1" "command2"...single and double quote function the same
   -f FILE, --cmdfile FILE
                         Directory to a cli command file.
   -m {show,testconfig,commit}, --mode {show,testconfig,commit}
-                        Operation mode: Default to "show", options of
-                        "testconfig" and "commit"
+                        Operation mode: Default to "show", options of "testconfig" and "commit"
   -p {bby,sry,van}, --campus {bby,sry,van}
-                        Campus: self-explanatory. All campuses are covered if
-                        no option of campus is provided
+                        Campus: self-explanatory. All campuses are covered if no option of campus is provided
   -r {all,core,edge,dc,ext,mgmt}, --role {all,core,edge,dc,ext,mgmt}
-                        Chassis role: Default to "all" for all chassis. Other
-                        choices are: "core" for CORE switches; "edge" for EDGE
-                        switches; "ext" for EXTENSION switches; "dc" for
-                        DATACENTRE switches, and "mgmt" for MANAGEMENT
-                        network.
+                        Chassis role: Default to "all" for all chassis. Other choices are: "core" for CORE switches; "edge" for EDGE switches; "ext" for EXTENSION switches; "dc" for DATACENTRE
+                        switches, and "mgmt" for MANAGEMENT network.
   -d {all,c,p,mp,m}, --model {all,c,p,mp,m}
-                        Chassis model: Default to "all" for all models,other
-                        choices are "c" for "EX2300-C-12P", "p" for
-                        "EX4300-48P/EX2300", "mp" for "EX4300-48MP",and "m"
-                        for manual input
+                        Chassis model: Default to "all" for all models,other choices are "c" for "EX2300-C-12P", "p" for "EX4300-48P/EX2300", "mp" for "EX4300-48MP",and "m" for manual input
+  -s, --silencer        Silence the output when hosts don't match given criteria
 ```
-
+### example 1 - make queries on 2 hosts
+```
+$ python3 ~/netauto/fireblade.mss.py -H host1.domain.com host2.domain.com -c 'show system information' 'show ethernet-switching table vlan-name DATA | except "ae0"'
+```
+### example 2 - test a change on multiple hosts
+```
+$ python3 ~/netauto/fireblade.mss.py -l ~/garage/hosts.all -f ~/garage/cli.adding.vlan.abc -m testconfig
+```
+### example 3 - apply a change on multiple hosts
+```
+$ python3 ~/netauto/fireblade.mss.py -l ~/garage/hosts.all -f ~/garage/cli.removing.vlan.xyz -m commit
+```
 ## fireblade.py
-v1.2.2
-#### Command Line Options
+v1.2.2\
+Development on this script is ceased upon the release of fireblade.mss, as the latter offers higher efficency and more features.
+### Command Line Options
 ```
 usage: fireblade.py [-h] (-H SINGLE_HOST | -l FILE) (-c COMMAND | -f FILE) [-m {show,testconfig,commit}] [-p {830,80}]
 
@@ -108,19 +115,15 @@ optional arguments:
   -p {830,80}, --port {830,80}
                         TCP port for NETCONF session. 830 by default otherwise 80
 ```
-#### Dependency
-```
-$ pip install junos-eznc
-```
-#### Examples 1 - query on a single host
+### Examples 1 - query on a single host
 ```
 $ pythno3 ~/netauto/fireblade.py -H <hostname> -c 'show ethernet-switching table vlan-name DATA | except "ae0"'
 ```
-#### Example 2 - testing configuration on a number of selected hosts
+### Example 2 - testing configuration on a number of selected hosts
 ```
 $ python3 ~/netauto/fireblade.py -l ~/garage/hosts.list -f ~/garage/cli.adding.vlan.abc -m testconfig
 ```
-#### Examle 3 - apply and commit configuration changes on a number of hosts
+### Examle 3 - apply and commit configuration changes on a number of hosts
 ```
 $ python3 ~/netauto/fireblade.py -l ~/garage/hosts.list -f ~/garage/cli.update.firewall.xyz -m commit
 ```
