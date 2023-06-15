@@ -10,14 +10,17 @@ Netauto's Runtime Environment includes:
 2) Necessary software and libaries installed on the management server. Those software and libraries are Python3 and its libraries, Netauto, Juniper Network Junos PyEZ Python Library, and some third-party libraries. Besides Netauto, these software and libraries should be installed and updated to latest versions by a sudo user of the management server. Netauto is installed and updated by NOC user with below commands. **NOTE**: please keep Netauto updated to the latest version.  
 ```
 # installation:
+$ git clone https://github.com/hillchoon/utils
 $ git clone https://github.com/hillchoon/netauto
+$ cd netauto
+$ git submodule update --init
 
 # update:
 $ cd netauto
 $ git pull
 $ cd
 ```
-4) A NOC user is granted with read-only acces to a list of managed network hosts on the production network. This list is created and maintained by a sudo user, and it could be a text file with hosts' IP address or FQDN.  
+4) A NOC user is granted with read-only acces to a list of managed network hosts on the production network. This list is created and maintained by sudo users, and it could be a text file with hosts' IP address or FQDN.  
 5) Managed network hosts shall be configured to allow SSH and NETCONF sessions initiated from management server.
 ### 1.2 A SUDO User
 1) Installs Python3, Junos PyEZ, and other third-party libraries (listed per Netauto script if any depedency).  
