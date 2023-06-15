@@ -16,37 +16,38 @@ def getArgs():
     # group arg_host 
     arg_host = parser.add_mutually_exclusive_group(required=True)
     arg_host.add_argument('-H', '--hosts', nargs='+', 
-        help='hosts\' FQDN in format of \'host1\' \'host2\'...single and double quote function the same')
-    arg_host.add_argument('-l', '--host_list', metavar="FILE", help='Direcotry to a list of hosts')
+        help='hosts\' FQDN in format of \'host1\' \'host2\'...single and double quote function the same.')
+    arg_host.add_argument('-l', '--host_list', metavar="FILE", help='Direcotry to a list of hosts.')
 
     # group arg_cmd
-    arg_cmd = parser.add_mutually_exclusive_group(required=True)
+    arg_cmd = parser.add_mutually_exclusive_group()
     arg_cmd.add_argument('-c', '--commands', nargs='+', 
-        help='command(s) in format of "command1" "command2"...single and double quote function the same')
+        help='command(s) in format of "command1" "command2"...single and double quote function the same.')
     arg_cmd.add_argument('-f', '--cmdfile', metavar="FILE", help='Directory to a cli command file.')
 
-    # option 'mode'
-    parser.add_argument('-m', '--mode', choices=['show','testconfig', 'commit'], default='show', 
-        help='Operation mode: Default to "show", options of "testconfig" and "commit"')
+    # arg 'mode'
+    parser.add_argument('-m', '--mode', choices=['show','testride', 'comconf', 'commit'], default='show', 
+        help='Operation mode: Default to "show". Other choices are "testride" for testing configuration, ' + 
+        '"comconf" for "commit confirm" with input minutes, and "commit".')
 
-    # option 'campus'
+    # arg 'campus'
     parser.add_argument('-p', '--campus', choices=['bby', 'sry', 'van'],
-        help='Campus: self-explanatory. All campuses are covered if no option of campus is provided')
+        help='Campus: self-explanatory. All campuses are covered if no option of campus is provided.')
 
-    # option 'role'
+    # arg 'role'
     parser.add_argument('-r', '--role', default='all', 
         choices=['all', 'core', 'edge', 'dc', 'ext', 'mgmt'], 
         help='Chassis role: Default to "all" for all chassis. Other choices are: "core" for CORE switches; "edge" for EDGE switches; "ext" for EXTENSION switches; ' + 
         '"dc" for DATACENTRE switches, and "mgmt" for MANAGEMENT network.')
 
-    # option 'model'
+    # arg 'model'
     parser.add_argument('-d', '--model', default='all', choices=['all', 'c', 'p', 'mp', 'm'], 
         help='Chassis model: Default to "all" for all models,' +
-        'other choices are "c" for "EX2300-C-12P", "p" for "EX4300-48P/EX2300", "mp" for "EX4300-48MP",' +
-        'and "m" for manual input')
+        'other choices are "c" for "EX2300-C-12P", "p" for "EX4300-48P", "mp" for "EX4300-48MP",' +
+        'and "m" for manual input.')
 
     parser.add_argument('-s', '--silencer', action="store_false",
-        help='Silence the output when hosts don\'t match given criteria')
+        help='Silence the output for mismatch hosts.')
 
     # start taking and processing args
     args = parser.parse_args()
@@ -68,8 +69,11 @@ def getArgs():
     elif args.cmdfile:
         with open(f"{args.cmdfile}", "r") as fo:
             commands = [line.strip() for line in fo.readlines() if not line.startswith('#')]
+    elif args.commands:
+
+            commands = args.commands
     else:
-        commands = args.commands
+        commands = []
 
     # model
     model = 'all' if args.model == 'all' else 'EX4300-48P' if args.model == 'p' else 'EX4300-48MP' if args.model == 'mp' else 'EX2300-C-12P' if args.model == 'c' else input("Please key in specific model: ") if args.model == 'm' else None
@@ -86,7 +90,7 @@ def getCredential():
     return credential
 
 # netconf session
-def ncsession(host, campus, model, role, commands, mode, uname, passwd, si):
+def ncsession(host, campus, model, role, commands, mode, time, uname, passwd, si):
 
     try:
         with Device(host=host, user=uname, password=passwd) as dev:
@@ -132,18 +136,20 @@ def ncsession(host, campus, model, role, commands, mode, uname, passwd, si):
                         print_out += line + "\n"
 
                 host_shell.close()
-                print (print_out)
+                print(print_out)
 
             else:
-                # skip change on mis-matched model
-                if model == 'EX4300-48MP' and fireblade_hw.model(dev) != model:
-                    print_out += "\nThis host is not in the same chassis model which changes are proposed to, skipping changes."
-                    print (print_out)
-                    return
-                if model == 'EX4300-48P' and fireblade_hw.model(dev) == 'EX4300-48MP':
-                    print_out += "\nThis host is not in the same chassis model which changes are proposed to, skipping changes."
-                    print (print_out)
-                    return
+#                # skip change on mis-matched model
+#                if model == 'EX4300-48MP' and fireblade_hw.model(dev) != model:
+#                    print_out += "\nThis host is not in the same chassis model which changes are proposed to, skipping changes."
+#                    print (print_out)
+#                    return
+#                if model == 'EX4300-48P' and fireblade_hw.model(dev) == 'EX4300-48MP':
+#                    print_out += "\nThis host is not in the same chassis model which changes are proposed to, skipping changes."
+#                    print (print_out)
+#                    return
+
+#                print (f'commands are: {commands}')
 
                 # continue on matched chassis
                 with Config(dev, mode='exclusive') as cu:
@@ -152,22 +158,26 @@ def ncsession(host, campus, model, role, commands, mode, uname, passwd, si):
                     for command in commands:
                         cu.load(command, format='set', ignore_warning=True)
 
-                    if cu.diff() != None:
-                        print_out += f'{cu.diff()}\n'
-                        try:
-                            cu.commit_check(timeout=600)
-                            print_out += '\033[32m' + 'Changes passed commit check.' + '\033[0m\n'
-                            if mode == 'commit':
-                                cu.commit(ignore_warning=True, timeout=600)
-                                print_out += '\033[32m' + 'Changes committed.' + '\033[0m\n'
-                            else:
-                                cu.rollback()
-                                print_out += '\033[93;1m' + 'Changes rolled back.' + '\033[0m\n'
-                        except CommitError as err:
+                    diff = cu.diff()
+
+                    print_out += f'{diff}\n' if len(commands) != 0 else f'{cu.diff(rb_id=1)}\n' if len(commands) == 0 else ''
+
+                    try:
+                        cu.commit_check(timeout=600)
+                        print_out += '\033[32m' + 'Changes passed commit check.' + '\033[0m\n'
+                        if mode == 'commit':
+                            cu.commit(ignore_warning=True, timeout=600)
+                            print_out += '\033[32m' + 'Changes committed.' + '\033[0m\n'
+                        elif mode == 'comconf':
+                            cu.commit(ignore_warning=True, timeout=600, confirm=time)
+                            print_out += '\033[93;1m' + f'Changes committed and will be rolled back in {time} minutes unless confirmed ' + '\033[0m\n'
+                        else:
                             cu.rollback()
-                            print_out += f'\033[31mError\033[0m in commit check, rolled back with {err.message}'
-                    else:
-                        print('No differences found.')
+                            print_out += '\033[93;1m' + 'Changes rolled back.' + '\033[0m\n'
+
+                    except CommitError as err:
+                        cu.rollback()
+                        print_out += f'\033[31mError\033[0m in commit check, rolled back with {err.message}'
 
                     print (print_out)
 
@@ -199,18 +209,30 @@ def main():
         print(f"Error: {err}")
         return
 
+    time = input("Minutes to confirm configuration change: ") if mode == 'comconf' else ''
+
     # credential
     credential = getCredential()
     uname = credential[0]
     passwd = credential[1]
 
-    print (commands)
+    print (f"commands: \n{commands}")
 
     # run commands on each host in parallel
     with concurrent.futures.ThreadPoolExecutor(max_workers=50) as executor:
-        futures = [executor.submit(ncsession, host, campus, model, role, commands, mode, uname, passwd, silencer) 
+        futures = [executor.submit(ncsession, host, campus, model, role, commands, mode, time, uname, passwd, silencer) 
         for host in hosts]
         concurrent.futures.wait(futures)
+
+        for future in futures:
+            try:
+                result = future.result()
+                if result:
+                    print (f'Good result is:{result}')
+
+            except TypeError as err:
+                print (f'An error occurred: {err}')
+#        print (futures)
 
     # ... (keep the existing code for summarizing counters, if needed)
 
