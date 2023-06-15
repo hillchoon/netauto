@@ -15,9 +15,14 @@ $ git clone https://github.com/hillchoon/netauto
 $ cd netauto
 $ git submodule update --init
 
-# update:
+# update netauto to latest:
 $ cd netauto
 $ git pull
+$ cd
+
+# update netauto's submodule utils to latest version:
+$ cd netauto/utils
+$ git checkout origin
 $ cd
 ```
 4) A NOC user is granted with read-only acces to a list of managed network hosts on the production network. This list is created and maintained by sudo users, and it could be a text file with hosts' IP address or FQDN.  
