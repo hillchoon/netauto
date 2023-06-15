@@ -1,6 +1,6 @@
 # Netauto
 
-A set of Python3 tools developed to manage and operate Juniper Network equipment on network operations.
+A set of Python3 tools developed for managing and operating Juniper Network in Network Operations.
 
 ## 1. You as A User
 ### 1.1 A NOC User
