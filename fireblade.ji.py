@@ -106,7 +106,7 @@ def install_twopkg(dev, p_pkg, mp_pkg, action):
 
     return ok, msg, action_report
 
-# call installation fuctions for chassis_type
+# call installation fuctions for chassis
 def installJUNOS(host, uname, passwd, junos, action):
 
     # set action o'{offset:02d}'r boot time
@@ -117,11 +117,11 @@ def installJUNOS(host, uname, passwd, junos, action):
         with Device(host=host, user=uname, password=passwd) as dev:
             
             # chassis type dictates package
-            chassis_type = fireblade_hw.chassis_type(dev)
-            if chassis_type == 'EX4300-48P':
+            chassis = fireblade_hw.chassis(dev)
+            if chassis == 'EX4300-48P':
                 pkg = junos["p_pkg"]
                 ok, msg, action_report = install_onepkg(dev, pkg, action)
-            elif chassis_type == 'EX4300-48MP':
+            elif chassis == 'EX4300-48MP':
                 pkg = junos["mp_pkg"]
                 ok, msg, action_report = install_onepkg(dev, pkg, action)
             else:
