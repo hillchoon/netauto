@@ -1,6 +1,6 @@
 # Netauto
 
-A set of Python3 tools developed to manage and operate Juniper Network equipment on network operations.
+A set of Python3 tools developed for managing and operating Juniper Network in Network Operations.
 
 ## 1. You as A User
 ### 1.1 A NOC User
@@ -12,16 +12,19 @@ Netauto's Runtime Environment includes:
 # installation:
 $ git clone https://github.com/hillchoon/utils
 $ git clone https://github.com/hillchoon/netauto
-$ cd netauto
+$ cd ~/netauto
 $ git submodule update --init
+$ cd
 
-# update netauto to latest:
-$ cd netauto
+# update netauto to latest version:
+$ cd ~/netauto
 $ git pull
 $ cd
 
 # update netauto's submodule utils to latest version:
-$ cd netauto/utils
+$ cd ~/utils
+$ git pull
+$ cd ~/netauto/utils
 $ git checkout origin
 $ cd
 ```
@@ -49,7 +52,7 @@ This argument could be:
 1) the directory to a text file of JUNOS commands, or  
 2) a list of quoted commands with a space in between. i.e. 'show system information | match "keyword"' 'show system uptime' 'show interfaces ge-0/0/0 extensive | match "error"'
 ## 3. fireblade.mss
-v0.85\
+v1.0\
 It is happening, **simultaneously**! \
 Introducing fireblade.mss for **m**ultiple **s**ession**s**.
 ### Key Features:
@@ -61,31 +64,46 @@ See details below from command line option '-h'.
 
 ### Command Line Options
 ```
-usage: fireblade.mss.py [-h] (-H HOSTS [HOSTS ...] | -l FILE) (-c COMMANDS [COMMANDS ...] | -f FILE) [-m {show,testconfig,commit}] [-p {bby,sry,van}] [-r {all,core,edge,dc,ext,mgmt}]
-                        [-d {all,c,p,mp,m}] [-s]
+usage: fireblade.mss.py [-h] (-H HOSTS [HOSTS ...] | -l FILE)
+                        [-c COMMANDS [COMMANDS ...] | -f FILE]
+                        [-m {show,testride,comconf,commit}] [-p {bby,sry,van}]
+                        [-r {all,core,edge,dc,ext,mgmt}] [-d {all,c,p,mp,m}]
+                        [-s]
 
 General Queries & Configuration Changes Tool
 
 optional arguments:
   -h, --help            show this help message and exit
   -H HOSTS [HOSTS ...], --hosts HOSTS [HOSTS ...]
-                        hosts' FQDN in format of 'host1' 'host2'...single and double quote function the same
+                        hosts' FQDN in format of 'host1' 'host2'...single and
+                        double quote function the same.
   -l FILE, --host_list FILE
-                        Direcotry to a list of hosts
+                        Direcotry to a list of hosts.
   -c COMMANDS [COMMANDS ...], --commands COMMANDS [COMMANDS ...]
-                        command(s) in format of "command1" "command2"...single and double quote function the same
+                        command(s) in format of "command1" "command2"...single
+                        and double quote function the same.
   -f FILE, --cmdfile FILE
                         Directory to a cli command file.
-  -m {show,testconfig,commit}, --mode {show,testconfig,commit}
-                        Operation mode: Default to "show", options of "testconfig" and "commit"
+  -m {show,testride,comconf,commit}, --mode {show,testride,comconf,commit}
+                        Operation mode: Default to "show". Other choices are
+                        "testride" for testing configuration, "comconf" for
+                        "commit confirm" with input minutes, and "commit".
   -p {bby,sry,van}, --campus {bby,sry,van}
-                        Campus: self-explanatory. All campuses are covered if no option of campus is provided
+                        Campus: self-explanatory. All campuses are covered if
+                        no option of campus is provided.
   -r {all,core,edge,dc,ext,mgmt}, --role {all,core,edge,dc,ext,mgmt}
-                        Chassis role: Default to "all" for all chassis. Other choices are: "core" for CORE switches; "edge" for EDGE switches; "ext" for EXTENSION switches; "dc" for DATACENTRE
-                        switches, and "mgmt" for MANAGEMENT network.
+                        Chassis role: Default to "all" for all chassis. Other
+                        choices are: "core" for CORE switches; "edge" for EDGE
+                        switches; "ext" for EXTENSION switches; "dc" for
+                        DATACENTRE switches, and "mgmt" for MANAGEMENT
+                        network.
   -d {all,c,p,mp,m}, --model {all,c,p,mp,m}
-                        Chassis model: Default to "all" for all models,other choices are "c" for "EX2300-C-12P", "p" for "EX4300-48P/EX2300", "mp" for "EX4300-48MP",and "m" for manual input
-  -s, --silencer        Silence the output when hosts don't match given criteria
+                        Chassis model: Default to "all" for all models,other
+                        choices are "c" for "EX2300-C-12P", "p" for
+                        "EX4300-48P", "mp" for "EX4300-48MP",and "m" for
+                        manual input.
+  -s, --silencer        Silence the output for mismatch hosts.
+
 ```
 ### example 1 - make queries on 2 hosts
 ```
@@ -136,14 +154,14 @@ $ python3 ~/netauto/fireblade.py -l ~/garage/hosts.list -f ~/garage/cli.adding.v
 $ python3 ~/netauto/fireblade.py -l ~/garage/hosts.list -f ~/garage/cli.update.firewall.xyz -m commit
 ```
 ## Hidden switch in a list of host or commands
-All Fireblade Netauto scripts support a hidden switch in a file of a list of hosts or commands. This switch comes in handy when you want the scripts to toggle some of the hosts or commands without having to delete them. To do that, a '#' shall be added at the begining of the line, see examples below:
+All Fireblade Netauto scripts support a hidden switch in a file of hosts or commands. This switch comes in handy when you want the scripts to toggle some of the hosts or commands without having to delete them. To do that, a '#' shall be added at the begining of the line, see examples below:
 ```
-$ cat ~/garage/hosts.campus.a
+$ cat ~/garage/hosts.campus.a # host3.com will be skipped
 host1.com
 host2.com
 #host3.com
 host4.com
-$ cat ~/garage/cli.show
+$ cat ~/garage/cli.show # command 'show system uptime' will be skipped
 show system information
 show interfaces terse irb
 show ethernet-switching table
