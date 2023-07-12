@@ -31,11 +31,10 @@ $ cd
 4) A NOC user is granted with read-only acces to a list of managed network hosts on the production network. This list is created and maintained by sudo users, and it could be a text file with hosts' IP address or FQDN.  
 5) Managed network hosts shall be configured to allow SSH and NETCONF sessions initiated from management server.
 ### 1.2 A SUDO User
-1) Installs Python3, Junos PyEZ, and other third-party libraries (listed per Netauto script if any depedency).  
+Installs Python3, Junos PyEZ, and other third-party libraries (listed per Netauto script if any depedency).  
 ```
 $ pip3 install junos-eznc
 ```
-2) Create and maintain a text list of managed network hosts, place the list in a directory to which NOC users are granted with read-only access.
 ## 2. Common Command Line Arguments
 A common command line to launch a Netauto script is:
 ```
@@ -44,13 +43,19 @@ $ python3 <directory-of-a-netauto-script> <argument-of-managed-hosts> <argument-
 **argument-of-managed-hosts**  
 This argument could be:  
 1) the directory to a text file of hosts' IP or FQDN. i.e. ~/garage/hosts.all, or  
-2) a list of FQDN of hosts with a space in between. i.e. host1.domain.com host2.domain.com host3.domain.com  
+2) a list of FQDN of hosts with a space in between. i.e.\
+   ```
+   host1.domain.com host2.domain.com host3.domain.com
+   ```
 
 **argument-of-commands**  
 Netauto drives different features for pulling information and pushing configuration changes, therefore this arugument is for either query or configuration, not a mix of both.  
 This argument could be:
 1) the directory to a text file of JUNOS commands, or  
-2) a list of quoted commands with a space in between. i.e. 'show system information | match "keyword"' 'show system uptime' 'show interfaces ge-0/0/0 extensive | match "error"'
+2) a list of quoted commands with a space in between. i.e. \
+   ```
+   'show system information | match "keyword"'[space]'show system uptime'[space]'show interfaces ge-0/0/0 extensive | match "error"'
+   ```
 ## 3. fireblade.mss
 v1.0\
 It is happening, **simultaneously**! \
@@ -60,9 +65,9 @@ Introducing fireblade.mss for **m**ultiple **s**ession**s**.
 2) Flexible input of multiple hosts and commands as command line arguments;
 3) Filter target hosts with arguments of campus, role, chassis model;
 4) Silencer to mute output for hosts that mismatch given creteria.
-See details below from command line option '-h'.
+See details below from command line argument '-h'.
 
-### Command Line Options
+### Command Line Arguments
 ```
 usage: fireblade.mss.py [-h] (-H HOSTS [HOSTS ...] | -l FILE)
                         [-c COMMANDS [COMMANDS ...] | -f FILE]
@@ -117,6 +122,52 @@ $ python3 ~/netauto/fireblade.mss.py -l ~/garage/hosts.all -f ~/garage/cli.addin
 ```
 $ python3 ~/netauto/fireblade.mss.py -l ~/garage/hosts.all -f ~/garage/cli.removing.vlan.xyz -m commit
 ```
+## Hidden switch in a list of host or commands
+All Fireblade Netauto scripts support a hidden switch in a file of hosts or commands. This switch comes in handy when you want the scripts to toggle some of the hosts or commands without having to delete them. To do that, a '#' shall be added at the begining of the line, see examples below:
+```
+$ cat ~/garage/hosts.campus.a # host3.com will be skipped
+host1.com
+host2.com
+#host3.com
+host4.com
+$ cat ~/garage/cli.show # command 'show system uptime' will be skipped
+show system information
+show interfaces terse irb
+show ethernet-switching table
+#show system uptime
+show spanning-tree statistics interface
+$
+```
+## fireblade.ji.py
+v0.8\
+Introducing fireblade.ji for **J**unos **I**nstallation
+### Key Features
+1) 50 simultaneous sessions of Junos Installation at a time;
+2) Generates log file for each Junos installation session in directory ./logs/
+3) Generates a summary log file for all installation sessions in directory defined by user\
+See details below from command line argument '-h'.
+### Command Line Arguments
+```
+usage: fireblade.ji.py [-h] (-H SINGLE_HOST | -l FILE) -x ACTION -s FILE
+
+General Queries & Configuration Changes Tool
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -H SINGLE_HOST, --single_host SINGLE_HOST
+                        FQDN of a host
+  -l FILE, --hosts_list FILE
+                        Direcotry to a list of hosts
+  -x ACTION, --action ACTION
+                        action after JUNOS is installed. Default to
+                        'rollback', other two options are 'now' for immediate
+                        rebooting or time string in format of 'yymmddhh' to
+                        complete the software installation. In last option
+                        fireblade.ji sets a random time offset 0-20 minutes
+                        for a host at the desired hour
+  -s FILE, --summary_log FILE
+                        Directory to an output file
+```
 ## fireblade.py
 v1.2.2\
 Development on this script is ceased upon the release of fireblade.mss, as the latter offers higher efficency and more features.
@@ -153,23 +204,6 @@ $ python3 ~/netauto/fireblade.py -l ~/garage/hosts.list -f ~/garage/cli.adding.v
 ```
 $ python3 ~/netauto/fireblade.py -l ~/garage/hosts.list -f ~/garage/cli.update.firewall.xyz -m commit
 ```
-## Hidden switch in a list of host or commands
-All Fireblade Netauto scripts support a hidden switch in a file of hosts or commands. This switch comes in handy when you want the scripts to toggle some of the hosts or commands without having to delete them. To do that, a '#' shall be added at the begining of the line, see examples below:
-```
-$ cat ~/garage/hosts.campus.a # host3.com will be skipped
-host1.com
-host2.com
-#host3.com
-host4.com
-$ cat ~/garage/cli.show # command 'show system uptime' will be skipped
-show system information
-show interfaces terse irb
-show ethernet-switching table
-#show system uptime
-show spanning-tree statistics interface
-$
-```
-
 ## fireblade.rootpass.py
 v0.4
 #### Command Line Options
