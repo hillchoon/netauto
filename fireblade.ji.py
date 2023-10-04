@@ -124,10 +124,13 @@ def installJUNOS(host, uname, passwd, junos, action):
             elif chassis == 'EX4300-48MP':
                 pkg = junos["mp_pkg"]
                 ok, msg, action_report = install_onepkg(dev, pkg, action)
-            else:
+            elif chassis == 'mixed':
                 p_pkg = junos["p_pkg"]
                 mp_pkg = junos["mp_pkg"]
                 ok, msg, action_report = install_twopkg(dev, p_pkg, mp_pkg, action)
+            else:
+                ok = False
+                action_report = f'JUNOS installation on {host} is skipped due to hardware mismatch'
 
         return ok, host, action_report
 
