@@ -168,6 +168,197 @@ optional arguments:
   -s FILE, --summary_log FILE
                         Directory to an output file
 ```
+### Example
+```
+$ python3 netauto/fireblade.ji.py -H <FQDN> -x now -s logs/<filename>.log
+Username: M.Schumacher
+Password: formula1champion
+Directory to JUNOS Package for EX4300-48P: <directory>/software/jinstall-ex-4300-21.4R3-S4.18-signed.tgz
+Directory to JUNOS Package for EX4300-48MP: <directory>/software/jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz
+
+JUNOS installation is undergoing and may take hours. Please be patient.
+
+You may track installation progress in below two ways:
+
+1) tail summary log file at logs/<filename>.log to view summary of the progress on targeted hosts, and
+2) tail log files named "host-junosinstallation-yyyy-mm-dd.log" for detailed progress on each host
+
+
+2099-10-24 09:01 <FQDN>: JUNOS installation completed.
+2099-10-24 09:01 <FQDN> Post installation action: Shutdown at Tue Oct 24 09:02:15 2099. [pid 56186]
+results: 
+[(True, '<FQDN>', 'Shutdown at Tue Oct 24 09:02:15 2099. [pid 56186]'), '\n']
+$
+$ cat logs/<host>-junosinstallation-2099-10-24.log -f
+08:19 request-package-checks-pending-install rpc is not supported on given device
+08:19 computing checksum on local package: ../jbackup/software/jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz
+08:19 cleaning filesystem ...
+08:20 before copy, computing checksum on remote package: /var/tmp/jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz
+08:23 b'jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz': 133185536 / 1331797046 (10%)
+08:26 b'jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz': 266371072 / 1331797046 (20%)
+08:29 b'jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz': 399540224 / 1331797046 (30%)
+08:32 b'jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz': 532725760 / 1331797046 (40%)
+08:35 b'jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz': 665911296 / 1331797046 (50%)
+08:38 b'jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz': 799080448 / 1331797046 (60%)
+08:41 b'jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz': 932265984 / 1331797046 (70%)
+08:44 b'jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz': 1065451520 / 1331797046 (80%)
+08:47 b'jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz': 1198620672 / 1331797046 (90%)
+08:50 b'jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz': 1331797046 / 1331797046 (100%)
+08:50 after copy, computing checksum on remote package: /var/tmp/jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz
+08:50 checksum check passed.
+08:50 installing software on VC member: 1 ... please be patient ...
+08:58 software pkgadd package-result: 0
+Output: 
+
+[Oct 24 08:50:57]: Checking pending install on fpc1
+
+Pushing /var/tmp/jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz to fpc1:/var/tmp/jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz
+Verified jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed signed by PackageProductionECP256_2023 method ECDSA256+SHA256
+Pushing Junos image package to the host...
+Installing /var/tmp/install-media-ex-4300mp-junos-21.4R3-S4.18-secure.tgz
+Extracting the package ...
+
+============================================
+Host OS upgrade is FORCED
+Current Host kernel version : 3.14.52-rt50-WR7.0.0.9_ovp
+Package Host kernel version : 3.14.52-rt50-WR7.0.0.9_ovp
+Current Host version        : 3.1.0
+Package Host version        : 3.1.0
+Min host version required for applications: 3.0.0
+============================================
+
+Validate linux image...
+upgrade_platform: -------------------
+upgrade_platform: Parameters passed:
+upgrade_platform: silent=0
+upgrade_platform: package=/var/tmp/tmp.WjGubcyRZHjunos_cli_upg/jinstall-ex-4300mp-junos-21.4R3-S4.18-secure-linux.tgz
+upgrade_platform: clean install=0
+upgrade_platform: on primary   =0
+upgrade_platform: clean upgrade=0
+upgrade_platform: Need reboot after staging=1
+upgrade_platform: -------------------
+upgrade_platform:
+upgrade_platform: Checking input /var/tmp/tmp.WjGubcyRZHjunos_cli_upg/jinstall-ex-4300mp-junos-21.4R3-S4.18-secure-linux.tgz ...
+upgrade_platform: Input package /var/tmp/tmp.WjGubcyRZHjunos_cli_upg/jinstall-ex-4300mp-junos-21.4R3-S4.18-secure-linux.tgz is valid.
+Secure Boot is enforced.
+ALLOW:usr/secureboot/grub/BOOTX64.EFI
+ALLOW:boot/bzImage-intel-x86-64.bin
+ALLOW:boot/initramfs.cpio.gz
+Setting up Junos host applications for installation ...
+Current junos instance is 0
+Installing Host OS ...
+upgrade_platform: -------------------
+upgrade_platform: Parameters passed:
+upgrade_platform: silent=0
+upgrade_platform: package=/var/tmp/jinstall-ex-4300mp-junos-21.4R3-S4.18-secure-linux.tgz
+upgrade_platform: clean install=0
+upgrade_platform: on primary   =0
+upgrade_platform: clean upgrade=0
+upgrade_platform: Need reboot after staging=0
+upgrade_platform: -------------------
+upgrade_platform:
+upgrade_platform: Checking input /var/tmp/jinstall-ex-4300mp-junos-21.4R3-S4.18-secure-linux.tgz ...
+upgrade_platform: Input package /var/tmp/jinstall-ex-4300mp-junos-21.4R3-S4.18-secure-linux.tgz is valid.
+Secure Boot is enforced.
+ALLOW:usr/secureboot/grub/BOOTX64.EFI
+ALLOW:boot/bzImage-intel-x86-64.bin
+ALLOW:boot/initramfs.cpio.gz
+upgrade_platform: Backing up boot assets..
+bzImage-intel-x86-64.bin: OK
+bzImage-intel-x86-64.bin.psig: OK
+initramfs.cpio.gz: OK
+initramfs.cpio.gz.psig: OK
+version.txt: OK
+upgrade_platform: Checksum verified and OK...
+/boot
+upgrade_platform: Backup completed
+upgrade_platform: Staging the upgrade package - /var/tmp/jinstall-ex-4300mp-junos-21.4R3-S4.18-secure-linux.tgz..
+bzImage-intel-x86-64.bin: OK
+bzImage-intel-x86-64.bin.psig: OK
+initramfs.cpio.gz: OK
+initramfs.cpio.gz.psig: OK
+version.txt: OK
+upgrade_platform: Checksum verified and OK...
+upgrade_platform: Staging of /var/tmp/jinstall-ex-4300mp-junos-21.4R3-S4.18-secure-linux.tgz completed
+upgrade_platform: System need *REBOOT* to complete the upgrade
+upgrade_platform: Run upgrade_platform with option -r | --rollback to rollback the upgrade
+
+Host OS upgrade staged. Reboot the system to complete installation!
+08:58 installing software on VC member: 0 ... please be patient ...
+09:01 software pkgadd package-result: 0
+Output: 
+Verified jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed signed by PackageProductionECP256_2023 method ECDSA256+SHA256
+Pushing Junos image package to the host...
+Installing /var/tmp/install-media-ex-4300mp-junos-21.4R3-S4.18-secure.tgz
+Extracting the package ...
+
+============================================
+Host OS upgrade is FORCED
+Current Host kernel version : 3.14.52-rt50-WR7.0.0.9_ovp
+Package Host kernel version : 3.14.52-rt50-WR7.0.0.9_ovp
+Current Host version        : 3.1.0
+Package Host version        : 3.1.0
+Min host version required for applications: 3.0.0
+============================================
+
+Validate linux image...
+upgrade_platform: -------------------
+upgrade_platform: Parameters passed:
+upgrade_platform: silent=0
+upgrade_platform: package=/var/tmp/tmp.AROXPZvP0Pjunos_cli_upg/jinstall-ex-4300mp-junos-21.4R3-S4.18-secure-linux.tgz
+upgrade_platform: clean install=0
+upgrade_platform: on primary   =0
+upgrade_platform: clean upgrade=0
+upgrade_platform: Need reboot after staging=1
+upgrade_platform: -------------------
+upgrade_platform: 
+upgrade_platform: Checking input /var/tmp/tmp.AROXPZvP0Pjunos_cli_upg/jinstall-ex-4300mp-junos-21.4R3-S4.18-secure-linux.tgz ... 
+upgrade_platform: Input package /var/tmp/tmp.AROXPZvP0Pjunos_cli_upg/jinstall-ex-4300mp-junos-21.4R3-S4.18-secure-linux.tgz is valid.
+Secure Boot is enforced.
+ALLOW:usr/secureboot/grub/BOOTX64.EFI
+ALLOW:boot/bzImage-intel-x86-64.bin
+ALLOW:boot/initramfs.cpio.gz
+Setting up Junos host applications for installation ...
+Current junos instance is 0
+Installing Host OS ...
+upgrade_platform: -------------------
+upgrade_platform: Parameters passed:
+upgrade_platform: silent=0
+upgrade_platform: package=/var/tmp/jinstall-ex-4300mp-junos-21.4R3-S4.18-secure-linux.tgz
+upgrade_platform: clean install=0
+upgrade_platform: on primary   =0
+upgrade_platform: clean upgrade=0
+upgrade_platform: Need reboot after staging=0
+upgrade_platform: -------------------
+upgrade_platform: 
+upgrade_platform: Checking input /var/tmp/jinstall-ex-4300mp-junos-21.4R3-S4.18-secure-linux.tgz ... 
+upgrade_platform: Input package /var/tmp/jinstall-ex-4300mp-junos-21.4R3-S4.18-secure-linux.tgz is valid.
+Secure Boot is enforced.
+ALLOW:usr/secureboot/grub/BOOTX64.EFI
+ALLOW:boot/bzImage-intel-x86-64.bin
+ALLOW:boot/initramfs.cpio.gz
+upgrade_platform: Backing up boot assets..
+bzImage-intel-x86-64.bin: OK
+bzImage-intel-x86-64.bin.psig: OK
+initramfs.cpio.gz: OK
+initramfs.cpio.gz.psig: OK
+version.txt: OK
+upgrade_platform: Checksum verified and OK...
+/boot
+upgrade_platform: Backup completed
+upgrade_platform: Staging the upgrade package - /var/tmp/jinstall-ex-4300mp-junos-21.4R3-S4.18-secure-linux.tgz..
+bzImage-intel-x86-64.bin: OK
+bzImage-intel-x86-64.bin.psig: OK
+initramfs.cpio.gz: OK
+initramfs.cpio.gz.psig: OK
+version.txt: OK
+upgrade_platform: Checksum verified and OK...
+upgrade_platform: Staging of /var/tmp/jinstall-ex-4300mp-junos-21.4R3-S4.18-secure-linux.tgz completed
+upgrade_platform: System need *REBOOT* to complete the upgrade
+upgrade_platform: Run upgrade_platform with option -r | --rollback to rollback the upgrade
+
+Host OS upgrade staged. Reboot the system to complete installation!
+```
 ## fireblade.py
 v1.2.2\
 Development on this script is ceased upon the release of fireblade.mss, as the latter offers higher efficency and more features.
