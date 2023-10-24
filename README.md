@@ -189,7 +189,7 @@ You may track installation progress in below two ways:
 results: 
 [(True, '<FQDN>', 'Shutdown at Tue Oct 24 09:02:15 2099. [pid 56186]'), '\n']
 $
-$ cat logs/<host>-junosinstallation-2099-10-24.log -f
+$ cat logs/<host>-junosinstallation-2099-10-24.log
 08:19 request-package-checks-pending-install rpc is not supported on given device
 08:19 computing checksum on local package: ../jbackup/software/jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz
 08:19 cleaning filesystem ...
