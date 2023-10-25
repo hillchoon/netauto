@@ -139,7 +139,7 @@ show spanning-tree statistics interface
 $
 ```
 ## fireblade.ji.py
-v0.8\
+v0.82\
 Introducing fireblade.ji for **J**unos **I**nstallation
 ### Key Features
 1) 50 simultaneous sessions of Junos Installation at a time;
