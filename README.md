@@ -359,6 +359,25 @@ upgrade_platform: Run upgrade_platform with option -r | --rollback to rollback t
 
 Host OS upgrade staged. Reboot the system to complete installation!
 ```
+## portusage.slax
+v1\
+This script was developped by Erik Zhu to generate a list of interfaces that are in the status of "Down" on a Juniper network equipment. It is a script stored at directory /var/db/scripts/op/, and excutable with JUNOS command 'op'.
+### Example
+```
+username@host> op portusage
+Type             Interface               Status          Last Flapped            Interface Description
+physical         vme                     up/down         Never
+physical         ge-0/2/1                up/down         2023-11-06 15:46:52 PST (21:28:00 ago)
+physical         ge-1/0/0                up/down         2023-10-28 12:32:57 PDT (1w3d 01:41 ago)
+physical         ge-1/0/1                up/down         2023-10-28 12:32:57 PDT (1w3d 01:41 ago)
+...
+<output omitted>
+...
+physical         mge-0/0/46              up/down         2023-10-28 12:32:45 PDT (1w3d 01:42 ago)
+physical         mge-0/0/47              up/down         2023-10-28 12:32:45 PDT (1w3d 01:42 ago)
+physical         em0                     up/down         2023-10-28 12:31:29 PDT (1w3d 01:43 ago)
+physical         em1                     up/down         2023-10-28 12:30:43 PDT (1w3d 01:44 ago)
+```
 ## fireblade.py
 v1.2.2\
 Development on this script is ceased upon the release of fireblade.mss, as the latter offers higher efficency and more features.
