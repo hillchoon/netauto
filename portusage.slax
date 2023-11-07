@@ -1,0 +1,37 @@
+version 1.0;
+ns junos = "http://xml.juniper.net/junos/*/junos";
+ns xnm = "http://xml.juniper.net/xnm/1.1/xnm";
+ns jcs = "http://xml.juniper.net/junos/commit-scripts/1.0";
+ns date = "http://exslt.org/dates-and-times";
+import "../import/junos.xsl";
+/* FORMATTING */
+var $fmt-interface-status = "%-10s\t %-16s\t %-10s\t %-21s\t %s";
+var $arguments = {
+        <argument> {
+                <name> "interface";
+        <description> "Show admin status of interface";
+        }
+}
+match / {
+        <op-script-results> {
+                var $get-interface-rpc = <get-interface-information>;
+                /* Retrieve the results of the API request */
+                var $results = jcs:invoke( $get-interface-rpc );
+                <output>jcs:printf($fmt-interface-status, "Type", "Interface", "Status", "Last Flapped", "Interface Description");
+                for-each($results/physical-interface) {
+                        /* Sort to show the latest flap first */
+                        sort ./interface-flapped {data-type "text"; order "descending";}
+                        /* Only look at interfaces with a physical status of down. */
+                        if (oper-status = 'down') {
+                                /* Output the interface admin status to the console */
+                                <output> jcs:printf($fmt-interface-status,
+                                "physical",
+                                name,
+                                admin-status _ "/" _ oper-status,
+                                interface-flapped,
+                                description);
+                        }
+                        
+                }
+        }
+}
