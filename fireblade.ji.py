@@ -173,7 +173,7 @@ def main():
     print ('\n1) tail summary log file at ' + f'{summary_log} to view summary of the progress on targeted hosts, and')
     print ('2) tail log files named "host-junosinstallation-yyyy-mm-dd.log" for detailed progress on each host\n')
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=50) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
         futures = [executor.submit(installJUNOS, host, uname, passwd, junos, action) for host in hosts]
         results =[]
 
