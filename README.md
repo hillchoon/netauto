@@ -1,9 +1,22 @@
-# Netauto
+**Last updated on November 10, 2023.**
 
-A set of Python3 tools developed for managing and operating Juniper Network in Network Operations.
+# Table of Content
+1. [Introduction](#introduction)
+2. [You as A User](#you-as-a-user)
+3. [Common Command Line Arguments](#common-command-line-arguments)
+4. [fireblade.mss](#fireblade.mss)
+5. [fireblade.ji](#fireblade.ji)
+6. [fireblade.ii](#fireblade.ii)
+7. [portusage.slax](#portusage.slax)
+8. [fireblade.py(legacy)](#fireblade.py(legacy))
+9. [fireblade.rootpass](#fireblade.rootpass)
+10. [fireblade.hardware.probe](#fireblade.hardware.probe)
+## Introduction
 
-## 1. You as A User
-### 1.1 A NOC User
+Netauto is a set of Python3 tools developed for managing and operating Juniper Network in Enterprise Network Operations.\
+
+## You as A User
+### 1. A NOC User
 A Netauto's Runtime Environment should be ready for a NOC user to perform operation and management tasks on the managed network hosts - Juniper Network equipment. 
 Netauto's Runtime Environment includes:  
 1) A management server granted with SSH and NETCONF access to production network.  
@@ -30,12 +43,12 @@ $ cd
 ```
 4) A NOC user is granted with read-only acces to a list of managed network hosts on the production network. This list is created and maintained by sudo users, and it could be a text file with hosts' IP address or FQDN.  
 5) Managed network hosts shall be configured to allow SSH and NETCONF sessions initiated from management server.
-### 1.2 A SUDO User
+### 2. A SUDO User
 Installs Python3, Junos PyEZ, and other third-party libraries (listed per Netauto script if any depedency).  
 ```
 $ pip3 install junos-eznc
 ```
-## 2. Common Command Line Arguments
+## Common Command Line Arguments
 A common command line to launch a Netauto script is:
 ```
 $ python3 <directory-of-a-netauto-script> <argument-of-managed-hosts> <argument-of-commands> <other-arguments>
@@ -56,7 +69,23 @@ This argument could be:
    ```
    'show system information | match "keyword"'[space]'show system uptime'[space]'show interfaces ge-0/0/0 extensive | match "error"'
    ```
-## 3. fireblade.mss
+**hidden switch in a list of host or commands**
+All Fireblade Netauto scripts support a hidden switch in a file of hosts or commands. This switch comes in handy when you want the scripts to toggle some of the hosts or commands without having to delete them. To do that, a '#' shall be added at the begining of the line, see examples below:
+```
+$ cat ~/garage/hosts.campus.a # host3.com will be skipped
+host1.com
+host2.com
+#host3.com
+host4.com
+$ cat ~/garage/cli.show # command 'show system uptime' will be skipped
+show system information
+show interfaces terse irb
+show ethernet-switching table
+#show system uptime
+show spanning-tree statistics interface
+$
+```
+## fireblade.mss
 v1.0\
 It is happening, **simultaneously**! \
 Introducing fireblade.mss for **m**ultiple **s**ession**s**.
@@ -122,23 +151,7 @@ $ python3 ~/netauto/fireblade.mss.py -l ~/garage/hosts.all -f ~/garage/cli.addin
 ```
 $ python3 ~/netauto/fireblade.mss.py -l ~/garage/hosts.all -f ~/garage/cli.removing.vlan.xyz -m commit
 ```
-## Hidden switch in a list of host or commands
-All Fireblade Netauto scripts support a hidden switch in a file of hosts or commands. This switch comes in handy when you want the scripts to toggle some of the hosts or commands without having to delete them. To do that, a '#' shall be added at the begining of the line, see examples below:
-```
-$ cat ~/garage/hosts.campus.a # host3.com will be skipped
-host1.com
-host2.com
-#host3.com
-host4.com
-$ cat ~/garage/cli.show # command 'show system uptime' will be skipped
-show system information
-show interfaces terse irb
-show ethernet-switching table
-#show system uptime
-show spanning-tree statistics interface
-$
-```
-## fireblade.ji.py
+## fireblade.ji
 v0.83\
 Introducing fireblade.ji for **J**unos **I**nstallation
 ### Key Features
@@ -359,6 +372,68 @@ upgrade_platform: Run upgrade_platform with option -r | --rollback to rollback t
 
 Host OS upgrade staged. Reboot the system to complete installation!
 ```
+## fireblade.ii
+v1\
+Introducing fireblade.ii for inventory of inactive interfaces on Juniper switches EX4300 and EX2300. In some network operations such an inventory would be also referred as port capacity.
+### Key Features:
+1) Up to 100 simultenious sessions at a round;
+2) Uses an agentm slax script 'portusage.slax' intalled on Juniper hosts as agent.
+3) Filter quateria: an interface's last flap dated back to last system boot date;
+4) Creates log directory 'inactive.interface.yyyy-mm-dd' at ~/logs/ for all generated files below;
+5) Generates summary log file named 'summary.log' with the collective inventory statistics;
+6) Prints on screen the collective inventory statistics, and error if fireblade.ii fails to connect to any hosts;
+7) Generates verbose inventory files for all connected host. Each file contains a list of inactive interfaces that meet the quateria, and the raw data from 
+```
+usage: fireblade.ii.py [-h] (-H HOSTS [HOSTS ...] | -l FILE)
+
+Fireblade.ii for inventory of inactive interfaces on Juniper switches
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -H HOSTS [HOSTS ...], --hosts HOSTS [HOSTS ...]
+                        hosts' FQDN in format of 'host1' 'host2'...single and
+                        double quote function the same.
+  -l FILE, --host_list FILE
+                        Direcotry to a list of hosts.
+```
+### Exampple
+```
+$ python3 netauto/fireblade.ii.py -H
+Username: M.Schumacher
+Password: formula1champion
+
+Fireblade.ii is inquiring the inventory of inactive interfaces on below chassis.
+An summary for all chassis and their respective inventory files will be saved in directory:
+./logs/inactive.interface.2023-11-10
+
+Hostname,Number of alive days,Number of members,Number of MPs,Number of Ps,Number of total interfaces,Number of inactive interfaces,Percentage of inactive interfaces
+host1,23w0d,1,0,0,12,9,75%
+host2,45w6d,3,0,3,144,34,24%
+host3,1w4d,10,0,10,480,255,53%
+$
+$ ls -l ~/logs/inactive.interface.2023-11-10/
+total 52
+-rw-rw-r--. 1 M.Schumacher formula1  1630 Nov 10 13:39 host1.ii.list.log
+-rw-rw-r--. 1 M.Schumacher formula1  6769 Nov 10 13:39 host2.ii.list.log
+-rw-rw-r--. 1 M.Schumacher formula1   339 Nov 10 13:40 summary.log
+-rw-rw-r--. 1 M.Schumacher formula1 35258 Nov 10 13:40 host3.ii.list.log
+$ cat ~/logs/inactive.interface.2023-11-10/host1.ii.list.log
+---inventory of inactive interfaces---
+ ge-0/0/0
+ ge-0/0/1
+ ge-0/0/2
+ ge-0/0/3
+ ge-0/0/4
+ ge-0/0/5
+ ge-0/0/6
+ ge-0/0/7
+ ge-0/0/9
+
+---portusage raw data---
+['Type      \t Interface       \t Status    \t Last Flapped         \t Interface Description\r', 'physical  \t vme             \t up/down   \t Never                \t \r', 'physical  \t ge-0/0/11       \t up/down   \t 2023-10-06 17:13:12 PDT (4w6d 21:50 ago)\t \r', 'physical  \t ge-0/0/10       \t up/down   \t 2023-10-06 17:13:10 PDT (4w6d 21:50 ago)\t \r', 'physical  \t ge-0/0/8        \t up/down   \t 2023-09-29 12:55:59 PDT (6w0d 02:07 ago)\t \r', 'physical  \t ge-0/0/0        \t up/down   \t 2023-06-02 07:38:20 PDT (23w0d 07:25 ago)\t \r', 'physical  \t ge-0/0/1        \t up/down   \t 2023-06-02 07:38:20 PDT (23w0d 07:25 ago)\t \r', 'physical  \t ge-0/0/2        \t up/down   \t 2023-06-02 07:38:20 PDT (23w0d 07:25 ago)\t \r', 'physical  \t ge-0/0/3        \t up/down   \t 2023-06-02 07:38:20 PDT (23w0d 07:25 ago)\t \r', 'physical  \t ge-0/0/4        \t up/down   \t 2023-06-02 07:38:20 PDT (23w0d 07:25 ago)\t \r', 'physical  \t ge-0/0/5        \t up/down   \t 2023-06-02 07:38:20 PDT (23w0d 07:25 ago)\t \r', 'physical  \t ge-0/0/6        \t up/down   \t 2023-06-02 07:38:20 PDT (23w0d 07:25 ago)\t \r', 'physical  \t ge-0/0/7        \t up/down   \t 2023-06-02 07:38:20 PDT (23w0d 07:25 ago)\t \r', 'physical  \t ge-0/0/9        \t up/down   \t 2023-06-02 07:38:20 PDT (23w0d 07:25 ago)\t \r', 'physical  \t me0             \t up/down   \t 2023-06-02 07:37:52 PDT (23w0d 07:25 ago)\t \r']
+$
+```
+
 ## portusage.slax
 v1\
 This script was developped by Erik Zhu to generate a list of interfaces that are in the status of "Down" on a Juniper network equipment. It is a script stored at directory /var/db/scripts/op/, and excutable with JUNOS command 'op'.
@@ -378,7 +453,7 @@ physical         mge-0/0/47              up/down         2023-10-28 12:32:45 PDT
 physical         em0                     up/down         2023-10-28 12:31:29 PDT (1w3d 01:43 ago)
 physical         em1                     up/down         2023-10-28 12:30:43 PDT (1w3d 01:44 ago)
 ```
-## fireblade.py
+## fireblade.py(legacy)
 v1.2.2\
 Development on this script is ceased upon the release of fireblade.mss, as the latter offers higher efficency and more features.
 ### Command Line Options
@@ -414,7 +489,7 @@ $ python3 ~/netauto/fireblade.py -l ~/garage/hosts.list -f ~/garage/cli.adding.v
 ```
 $ python3 ~/netauto/fireblade.py -l ~/garage/hosts.list -f ~/garage/cli.update.firewall.xyz -m commit
 ```
-## fireblade.rootpass.py
+## fireblade.rootpass
 v0.4
 #### Command Line Options
 ```
@@ -439,7 +514,7 @@ Python3 standard modules passlib is required. Intall with pip:
 ```
 $ pip install passlib
 ```
-## fireblade.hardware.probe.py
+## fireblade.hardware.probe
 v1.0
 #### Command Line Options
 ```
