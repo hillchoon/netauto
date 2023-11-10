@@ -8,7 +8,7 @@
 5. [fireblade.ji](#firebladeji)
 6. [fireblade.ii](#firebladeii)
 7. [portusage.slax](#portusageslax)
-8. [fireblade.py(legacy)](#firebladepy(legacy))
+8. [fireblade.py(legacy)](#firebladepylegacy))
 9. [fireblade.rootpass](#firebladerootpass)
 10. [fireblade.hardware.probe](#firebladehardwareprobe)
 ## Introduction
