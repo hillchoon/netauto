@@ -13,7 +13,7 @@
 10. [fireblade.hardware.probe](#firebladehardwareprobe)
 ## Introduction
 
-Netauto is a set of Python3 tools developed for managing and operating Juniper Network in Enterprise Network Operations.\
+Netauto is a set of Python3 tools developed for managing and operating Juniper Network in Enterprise Network Operations.
 
 ## You as A User
 ### 1. A NOC User
