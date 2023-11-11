@@ -6,7 +6,7 @@
 3. [Common Command Line Arguments](#common-command-line-arguments)
 4. [fireblade.mss](#fireblademss)
 5. [JUNOS Installation](#firebladeji)
-6. [Inventory of Inactive Interfaces](#firebladeii)
+6. [Inactive Interfaces Inventory](#firebladeii)
 7. [II Agent](#portusageslax)
 8. [Legacy Fireblade](#firebladepylegacy))
 9. [Root Password Generator](#firebladerootpass)
