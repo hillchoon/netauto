@@ -5,12 +5,12 @@
 2. [You as A User](#you-as-a-user)
 3. [Common Command Line Arguments](#common-command-line-arguments)
 4. [fireblade.mss](#fireblademss)
-5. [fireblade.ji](#firebladeji)
-6. [fireblade.ii](#firebladeii)
-7. [portusage.slax](#portusageslax)
-8. [fireblade.py(legacy)](#firebladepylegacy))
-9. [fireblade.rootpass](#firebladerootpass)
-10. [fireblade.hardware.probe](#firebladehardwareprobe)
+5. [JUNOS Installation](#firebladeji)
+6. [Inventory of Inactive Interfaces](#firebladeii)
+7. [II Agent](#portusageslax)
+8. [Legacy Fireblade](#firebladepylegacy))
+9. [Root Password Generator](#firebladerootpass)
+10. [Hardware Probe](#firebladehardwareprobe)
 ## Introduction
 
 Netauto is a set of Python3 tools developed for managing and operating Juniper Network in Enterprise Network Operations.
