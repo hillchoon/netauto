@@ -436,7 +436,7 @@ $
 
 ## portusage.slax
 v1\
-This script was developped by Erik Zhu to generate a list of interfaces that are in the status of "Down" on a Juniper network equipment. It is a script stored at directory /var/db/scripts/op/, and excutable with JUNOS command 'op'.
+This script was developped by Erik Zhu. It is called as an agent in fireblade.ii to generate a list of interfaces that are in the status of "Down" on a Juniper network equipment. It is a script stored at directory /var/db/scripts/op/, and excutable with JUNOS command 'op'.
 ### Example
 ```
 username@host> op portusage
