@@ -1,6 +1,12 @@
 **Last updated on November 10, 2023.**
 
+## Introduction
 NETAUTO is a Python3-based network management toolkit designed for scalable campus networks utilizing Juniper Networks equipment. It has been tested and validated on JUNOS 21.4 kernel and earlier, along with junos-eznc 2.6.7. The toolkit has been successfully deployed on a network comprising more than 300 Juniper Networks hardware components.
+
+With NETAUTO, computer network administrators can make CLI queries, configuration changes and JUNOS software upgrade on a Juniper campus network,
+1) with one time login;
+2) with rich commmand line options and switches to manipulate target hosts and CLI commands;
+3) in up to 100 simultaneous SSH sessions
 
 # Table of Content
 1. [Introduction](#introduction)
@@ -13,9 +19,6 @@ NETAUTO is a Python3-based network management toolkit designed for scalable camp
 8. [Legacy Fireblade](#firebladepylegacy))
 9. [Root Password Generator](#firebladerootpass)
 10. [Hardware Probe](#firebladehardwareprobe)
-## Introduction
-
-Netauto is a set of Python3 tools developed for managing and operating Juniper Network in Enterprise Network Operations.
 
 ## You as A User
 ### 1. A NOC User
