@@ -6,7 +6,7 @@ NETAUTO is a Python3-based network management toolkit designed for scalable camp
 NETAUTO empowers network administrators to perform CLI queries, configuration changes, and JUNOS software upgrades on a campus network with:
 1) Single login convenience
 2) Abundant options for manipulating target hosts and CLI commands
-3) Simultaneous SSH sessions, supporting up to 100 connections.
+3) Simultaneous SSH up to 100 sessions.
 
 # Table of Content
 1. [Introduction](#introduction)
