@@ -187,12 +187,13 @@ optional arguments:
                         Directory to an output file
 ```
 ### Example
+After a run-time interactive input for username and password, **directories of JUNOS installation packages are provided via another two run-time interactive inputs**. See the two lines start with "Directory to JUNOS ..." after prompt "Password:" in below example.
 ```
 $ python3 netauto/fireblade.ji.py -H <FQDN> -x now -s logs/<filename>.log
 Username: M.Schumacher
 Password: formula1champion
-Directory to JUNOS Package for EX4300-48P: <directory>/software/jinstall-ex-4300-21.4R3-S4.18-signed.tgz
-Directory to JUNOS Package for EX4300-48MP: <directory>/software/jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz
+Directory to JUNOS Package for EX4300-48P: <directory>/jinstall-ex-4300-21.4R3-S4.18-signed.tgz
+Directory to JUNOS Package for EX4300-48MP: <directory>/jinstall-host-ex-4300mp-x86-64-21.4R3-S4.18-secure-signed.tgz
 
 JUNOS installation is undergoing and may take hours. Please be patient.
 
