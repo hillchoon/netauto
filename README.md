@@ -110,44 +110,42 @@ See details below from command line argument '-h'.
 ```
 usage: fireblade.mss.py [-h] (-H HOSTS [HOSTS ...] | -l FILE)
                         [-c COMMANDS [COMMANDS ...] | -f FILE]
-                        [-m {show,testride,comconf,commit}] [-p {bby,sry,van}]
-                        [-r {all,core,edge,dc,ext,mgmt}] [-d {all,c,p,mp,m}]
-                        [-s]
+                        [-m {show,testride,comconf,commit,intdesc}]
+                        [-p {bby,sry,van}] [-r {all,core,edge,dc,ext,mgmt}]
+                        [-d {all,c,p,mp,m}] [-s]
 
 General Queries & Configuration Changes Tool
 
 optional arguments:
   -h, --help            show this help message and exit
   -H HOSTS [HOSTS ...], --hosts HOSTS [HOSTS ...]
-                        hosts' FQDN in format of 'host1' 'host2'...single and
-                        double quote function the same.
+                        hosts' FQDN in format of 'host1' 'host2'...single and double quote function the same.
   -l FILE, --host_list FILE
                         Direcotry to a list of hosts.
   -c COMMANDS [COMMANDS ...], --commands COMMANDS [COMMANDS ...]
-                        command(s) in format of "command1" "command2"...single
-                        and double quote function the same.
+                        command(s) in format of "command1" "command2"...single and double quote function the same.
   -f FILE, --cmdfile FILE
                         Directory to a cli command file.
-  -m {show,testride,comconf,commit}, --mode {show,testride,comconf,commit}
-                        Operation mode: Default to "show". Other choices are
-                        "testride" for testing configuration, "comconf" for
-                        "commit confirm" with input minutes, and "commit".
+  -m {show,testride,comconf,commit,intdesc}, --mode {show,testride,comconf,commit,intdesc}
+                        Operation mode: Default to "show". Other choices are:
+                        "testride" for testing configuration;
+                        "comconf" for "commit confirm" with input minutes;
+                        "commit" as what it is;
+                        "intdesc" for "update interface description" with specific input VLAN names
   -p {bby,sry,van}, --campus {bby,sry,van}
-                        Campus: self-explanatory. All campuses are covered if
-                        no option of campus is provided.
+                        Campus: self-explanatory. All campuses are covered if no option of campus is provided.
   -r {all,core,edge,dc,ext,mgmt}, --role {all,core,edge,dc,ext,mgmt}
-                        Chassis role: Default to "all" for all chassis. Other
-                        choices are: "core" for CORE switches; "edge" for EDGE
-                        switches; "ext" for EXTENSION switches; "dc" for
-                        DATACENTRE switches, and "mgmt" for MANAGEMENT
-                        network.
+                        Chassis role: Default to "all" for all chassis. Other choices are: 
+                        "core" for CORE switches;
+                        "edge" for EDGE switches;
+                        "ext" for EXTENSION switches; "dc" for DATACENTRE switches, and "mgmt" for MANAGEMENT network.
   -d {all,c,p,mp,m}, --model {all,c,p,mp,m}
-                        Chassis model: Default to "all" for all models,other
-                        choices are "c" for "EX2300-C-12P", "p" for
-                        "EX4300-48P", "mp" for "EX4300-48MP",and "m" for
-                        manual input.
+                        Chassis model: Default to "all" for all models,other choices are:
+                        "c" for "EX2300-C-12P",
+                        "p" for "EX4300-48P",
+                        "mp" for "EX4300-48MP",
+                        and "m" for manual input.
   -s, --silencer        Silence the output for mismatch hosts.
-
 ```
 ### example 1 - make queries on 2 hosts
 ```
