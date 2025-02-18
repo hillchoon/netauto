@@ -91,7 +91,12 @@ show spanning-tree statistics interface
 $
 ```
 ## fireblade.mss
+v1.1\
+**What's New**
+* Adds feature of updating interface description with **AV** where the interfaces are assigned with VLAN AV or AVNET\
+
 v1.0\
+**What's New**\
 It is happening, **simultaneously**! \
 Introducing fireblade.mss for **m**ultiple **s**ession**s**.
 ### Key Features:
