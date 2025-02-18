@@ -93,7 +93,7 @@ $
 ## fireblade.mss
 v1.1\
 **What's New**
-* Adds feature of updating interface description with **AV** where the interfaces are assigned with VLAN AV or AVNET\
+* Adds feature of updating description of interfaces that are assigned to specific VLAN\
 
 v1.0\
 **What's New**\
