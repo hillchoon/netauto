@@ -26,9 +26,12 @@ def getArgs():
     arg_cmd.add_argument('-f', '--cmdfile', metavar="FILE", help='Directory to a cli command file.')
 
     # arg 'mode'
-    parser.add_argument('-m', '--mode', choices=['show','testride', 'comconf', 'commit'], default='show', 
-        help='Operation mode: Default to "show". Other choices are "testride" for testing configuration, ' + 
-        '"comconf" for "commit confirm" with input minutes, and "commit".')
+    parser.add_argument('-m', '--mode', choices=['show','testride', 'comconf', 'commit', 'intdesc'], default='show', 
+        help='Operation mode: Default to "show". Other choices are:\n' + 
+        '"testride" for testing configuration;\n' + 
+        '"comconf" for "commit confirm" with input minutes;\n' + 
+        '"commit" as what it is;\n' +
+        '"intdesc" for "update interface description" with specific input VLAN names')
 
     # arg 'campus'
     parser.add_argument('-p', '--campus', choices=['bby', 'sry', 'van'],
@@ -89,8 +92,69 @@ def getCredential():
     credential[1] = passwd
     return credential
 
+# funciton 'convertreplace' generate 
+def convertreplace(dev, old_pattern, new_pattern):
+
+    # generate command to get matched lines
+    command = [f"show configuration | display set | match {old_pattern}"]
+    # get matched lines
+    matched_config_lines = inquiry(dev, command).splitlines()
+    
+    # generate command sets equipvalent to 'replace pattern with'
+    commands = []
+    for line in matched_config_lines:
+        commands.append(line.replace('set','delete').strip())
+        commands.append(line.replace(old_pattern, new_pattern).strip())
+
+    return commands
+
+# function 'inqury' to excute show commands
+def inquiry(dev, commands):
+    host_shell = StartShell(dev)
+    host_shell.open()
+    print_out = ''
+
+    # excute show commands
+    for command in commands:
+
+        cli_output = host_shell.run(f"cli -c '{command} | no-more'")[1]
+        trimed_output = formatter.pop_first_last_lines(cli_output)
+
+        # reassemble output
+        for line in trimed_output:
+            print_out += line + "\n"
+
+    host_shell.close()
+    return print_out
+
+# funciton 'config_change' to implement changes
+def config_change(dev,commands,mode,time):
+    print_out = ''
+    with Config(dev, mode='exclusive') as cu:
+    # excute commands
+        for command in commands:
+            cu.load(command, format='set', ignore_warning=True)
+        diff = cu.diff()
+        print_out += f'{diff}\n' if len(commands) != 0 else f'{cu.diff(rb_id=1)}\n' if len(commands) == 0 else ''
+        try:
+            cu.commit_check(timeout=600)
+            print_out += '\033[32m' + 'Changes passed commit check.' + '\033[0m\n'
+            if mode == 'commit':
+                cu.commit(ignore_warning=True, timeout=600)
+                print_out += '\033[32m' + 'Changes committed.' + '\033[0m\n'
+            elif mode == 'comconf':
+                cu.commit(ignore_warning=True, timeout=600, confirm=time)
+                print_out += '\033[93;1m' + f'Changes committed and will be rolled back in {time} minutes unless confirmed ' + '\033[0m\n'
+            else:
+                cu.rollback()
+                print_out += '\033[93;1m' + 'Changes rolled back.' + '\033[0m\n'
+        except CommitError as err:
+            cu.rollback()
+            print_out += f'\033[31mError\033[0m in commit check, rolled back with {err.message}'
+        return print_out
+
 # netconf session
-def ncsession(host, campus, model, role, commands, mode, time, uname, passwd, si):
+def ncsession(host, campus, model, role, commands, mode, commit_mode, time, uname, passwd, si, vlan):
 
     try:
         with Device(host=host, user=uname, password=passwd) as dev:
@@ -121,65 +185,46 @@ def ncsession(host, campus, model, role, commands, mode, time, uname, passwd, si
                 return
             
             # mode dictates
-            if mode == 'show':
-                host_shell = StartShell(dev)
-                host_shell.open()
+            if mode == 'show':  # commands to make inquiry
+                print (print_out + f'\n{inquiry(dev,commands)}')
 
-                # excute commands
+            elif mode == 'intdesc': # update interface description per its vlan
+                
+                interfaces = []
+
+                # query list of interfaces that are assigned with the vlan
+                outputs = inquiry(dev,['show configuration interfaces | display set | match ' + f'{vlan}'])
+                for item in outputs.splitlines():
+                    interfaces.append(item.split()[2])
+
+                # remove trunked ports from interfaces
+                outputs = inquiry(dev,['show configuration interfaces | display set | match trunk'])
+                for item in outputs.splitlines():
+                    trunk_interface = item.split()[2]
+                    interfaces.remove(trunk_interface) if trunk_interface in interfaces else None
+                
+                # populate commands to update interface description
+                commands = []
+                for item in interfaces:
+                    commands.append('set interfaces ' + f'{item}' + ' description ' + f'{vlan}')
+
+                # call function 'config_change' to implement the interface description update
+                print (print_out + f'\n{config_change(dev,commands,commit_mode,time)}')
+
+            else:   # commands to make configuration changes
+                # sort out commands to comply with Juniper RPC
+                sorted_commands = []
                 for command in commands:
+                    command_split = command.split()
+                    if command_split[0] == 'replace':
+                        # go convertreplace
+                        replace_pattern_commands = convertreplace(dev, command_split[2], command_split[4])
+                        sorted_commands += replace_pattern_commands
+                    else:
+                        sorted_commands.append(command)
 
-                    cli_output = host_shell.run(f"cli -c '{command} | no-more'")[1]
-                    trimed_output = formatter.pop_first_last_lines(cli_output)
-
-                    # reassemble output
-                    for line in trimed_output:
-                        print_out += line + "\n"
-
-                host_shell.close()
-                print(print_out)
-
-            else:
-#                # skip change on mis-matched model
-#                if model == 'EX4300-48MP' and fireblade_hw.model(dev) != model:
-#                    print_out += "\nThis host is not in the same chassis model which changes are proposed to, skipping changes."
-#                    print (print_out)
-#                    return
-#                if model == 'EX4300-48P' and fireblade_hw.model(dev) == 'EX4300-48MP':
-#                    print_out += "\nThis host is not in the same chassis model which changes are proposed to, skipping changes."
-#                    print (print_out)
-#                    return
-
-#                print (f'commands are: {commands}')
-
-                # continue on matched chassis
-                with Config(dev, mode='exclusive') as cu:
-
-                    # excute commands
-                    for command in commands:
-                        cu.load(command, format='set', ignore_warning=True)
-
-                    diff = cu.diff()
-
-                    print_out += f'{diff}\n' if len(commands) != 0 else f'{cu.diff(rb_id=1)}\n' if len(commands) == 0 else ''
-
-                    try:
-                        cu.commit_check(timeout=600)
-                        print_out += '\033[32m' + 'Changes passed commit check.' + '\033[0m\n'
-                        if mode == 'commit':
-                            cu.commit(ignore_warning=True, timeout=600)
-                            print_out += '\033[32m' + 'Changes committed.' + '\033[0m\n'
-                        elif mode == 'comconf':
-                            cu.commit(ignore_warning=True, timeout=600, confirm=time)
-                            print_out += '\033[93;1m' + f'Changes committed and will be rolled back in {time} minutes unless confirmed ' + '\033[0m\n'
-                        else:
-                            cu.rollback()
-                            print_out += '\033[93;1m' + 'Changes rolled back.' + '\033[0m\n'
-
-                    except CommitError as err:
-                        cu.rollback()
-                        print_out += f'\033[31mError\033[0m in commit check, rolled back with {err.message}'
-
-                    print (print_out)
+                # call function 'config_change' to implement the sorted configuration change commands
+                print (print_out + f'\n{config_change(dev,sorted_commands,mode,time)}')
 
     except ConnectError as err:
         print(f"Cannot connect to device: {err}")
@@ -191,7 +236,6 @@ def ncsession(host, campus, model, role, commands, mode, time, uname, passwd, si
         print(f"Connection to device was refused: {err}, please check NETCONF configuration")
     except RpcError as err:
         print(f"RPC error: {err}")
-
 
 def main():
 
@@ -209,7 +253,9 @@ def main():
         print(f"Error: {err}")
         return
 
-    time = input("Minutes to confirm configuration change: ") if mode == 'comconf' else ''
+    vlan_name = input("VLAN NAME of interest to change interface description: ") if mode == 'intdesc' else ''
+    commit_mode = input("Immediate commmit ('commit') or commit confirm ('comconf'): ") if mode == 'intdesc' else mode
+    time = input("Minutes to confirm configuration change: ") if commit_mode == 'comconf' else ''
 
     # credential
     credential = getCredential()
@@ -220,7 +266,7 @@ def main():
 
     # run commands on each host in parallel
     with concurrent.futures.ThreadPoolExecutor(max_workers=50) as executor:
-        futures = [executor.submit(ncsession, host, campus, model, role, commands, mode, time, uname, passwd, silencer) 
+        futures = [executor.submit(ncsession, host, campus, model, role, commands, mode, commit_mode, time, uname, passwd, silencer, vlan_name) 
         for host in hosts]
         concurrent.futures.wait(futures)
 
