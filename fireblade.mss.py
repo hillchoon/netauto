@@ -11,7 +11,10 @@ import concurrent.futures
 # get and process command line options
 def getArgs():
 
-    parser = argparse.ArgumentParser(description = 'General Queries & Configuration Changes Tool')
+    parser = argparse.ArgumentParser(
+        description = 'General Queries & Configuration Changes Tool',
+        formatter_class=argparse.RawTextHelpFormatter
+        )
     
     # group arg_host 
     arg_host = parser.add_mutually_exclusive_group(required=True)
@@ -40,14 +43,19 @@ def getArgs():
     # arg 'role'
     parser.add_argument('-r', '--role', default='all', 
         choices=['all', 'core', 'edge', 'dc', 'ext', 'mgmt'], 
-        help='Chassis role: Default to "all" for all chassis. Other choices are: "core" for CORE switches; "edge" for EDGE switches; "ext" for EXTENSION switches; ' + 
-        '"dc" for DATACENTRE switches, and "mgmt" for MANAGEMENT network.')
+        help='Chassis role: Default to "all" for all chassis. Other choices are: ' +
+        '\n"core" for CORE switches;' + 
+        '\n"edge" for EDGE switches;' + 
+        '\n"ext" for EXTENSION switches; ' + 
+        '\"dc" for DATACENTRE switches, and "mgmt" for MANAGEMENT network.')
 
     # arg 'model'
     parser.add_argument('-d', '--model', default='all', choices=['all', 'c', 'p', 'mp', 'm'], 
-        help='Chassis model: Default to "all" for all models,' +
-        'other choices are "c" for "EX2300-C-12P", "p" for "EX4300-48P", "mp" for "EX4300-48MP",' +
-        'and "m" for manual input.')
+        help='Chassis model: Default to "all" for all models,other choices are:' + 
+        '\n"c" for "EX2300-C-12P",' + 
+        '\n"p" for "EX4300-48P",' + 
+        '\n"mp" for "EX4300-48MP",' +
+        '\nand "m" for manual input.')
 
     parser.add_argument('-s', '--silencer', action="store_false",
         help='Silence the output for mismatch hosts.')
