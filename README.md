@@ -1,4 +1,4 @@
-**Last updated on November 10, 2023.**
+**Last updated on February 18, 2025.**
 
 ## Introduction
 NETAUTO is a Python3-based network management toolkit designed for scalable campus networks utilizing Juniper Networks equipment. It has been tested and validated on JUNOS 21.4 kernel and earlier, along with junos-eznc 2.6.7. The toolkit has been successfully deployed on a network comprising more than 300 Juniper Networks hardware components.
