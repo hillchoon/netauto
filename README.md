@@ -1,4 +1,4 @@
-**Last updated on February 18, 2025.**
+**Last updated on Jun 20, 2025.**
 
 ## Introduction
 NETAUTO is a Python3-based network management toolkit designed for scalable campus networks utilizing Juniper Networks equipment. It has been tested and validated on JUNOS 21.4 kernel and earlier, along with junos-eznc 2.6.7. The toolkit has been successfully deployed on a network comprising more than 300 Juniper Networks hardware components.
@@ -8,17 +8,25 @@ NETAUTO empowers network administrators to perform CLI queries, configuration ch
 2) Abundant options for manipulating target hosts and CLI commands
 3) Simultaneous SSH up to 100 sessions.
 
+## What's New
+### fireblade.rootpass v0.6 | June 20, 2025
+* added new feature to take input in cli interaction as new password. Default to auto-generated password without input
+* revised to push a universal password to all target hosts, removed the feature of random password generated for each device.
+* removed command line optional argument --port {830,80}
+* see udpated section [Root Password Generator](#firebladerootpass) for details
+
 # Table of Content
 1. [Introduction](#introduction)
-2. [You as A User](#you-as-a-user)
-3. [Common Command Line Arguments](#common-command-line-arguments)
-4. [fireblade.mss](#fireblademss)
-5. [JUNOS Installation](#firebladeji)
-6. [Inactive Interfaces Inventory](#firebladeii)
-7. [II Agent](#portusageslax)
-8. [Legacy Fireblade](#firebladepylegacy))
-9. [Root Password Generator](#firebladerootpass)
-10. [Hardware Probe](#firebladehardwareprobe)
+2. [What's New](#whats-new)
+3. [You as A User](#you-as-a-user)
+4. [Common Command Line Arguments](#common-command-line-arguments)
+5. [fireblade.mss](#fireblademss)
+6. [JUNOS Installation](#firebladeji)
+7. [Inactive Interfaces Inventory](#firebladeii)
+8. [II Agent](#portusageslax)
+9. [Legacy Fireblade](#firebladepylegacy))
+10. [Root Password Generator](#firebladerootpass)
+11. [Hardware Probe](#firebladehardwareprobe)
 
 ## You as A User
 ### 1. A NOC User
@@ -499,12 +507,12 @@ $ python3 ~/netauto/fireblade.py -l ~/garage/hosts.list -f ~/garage/cli.adding.v
 $ python3 ~/netauto/fireblade.py -l ~/garage/hosts.list -f ~/garage/cli.update.firewall.xyz -m commit
 ```
 ## fireblade.rootpass
-v0.4
+v0.6
 #### Command Line Options
 ```
-usage: fireblade.rootpass.py [-h] (-H SINGLE_HOST | -l FILE) [-t] [-p {830,80}] [-o FILE]
+usage: fireblade.rootpass.py [-h] (-H SINGLE_HOST | -l FILE) [-t] [-o FILE]
 
-NETCONF session to change root password on remote Juniper hosts and log host and password pairs
+Netauto Bot for Juniper Switch Root Password Change
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -513,10 +521,9 @@ optional arguments:
   -l FILE, --hosts_list FILE
                         direcotry of a host list
   -t, --testride        discard configuration change
-  -p {830,80}, --port {830,80}
-                        TCP port for NETCONF session. Script uses 830 by default if this option is not set
   -o FILE, --output FILE
                         directory to output file
+
 ```
 #### Dependency
 Python3 standard modules passlib is required. Intall with pip:
