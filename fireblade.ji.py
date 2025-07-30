@@ -59,8 +59,10 @@ def getCredential():
 def getDir(args):
     while True:
         file_dir = input(f'Directory to JUNOS Package for {args}: ')
-        if os.path.isfile(file_dir):
+        if os.path.isfile(file_dir) and len(file_dir) != 0:
             return file_dir
+        elif len(file_dir) == 0:
+            return 'skip_pkg'
         else:
             print ("Package Directory invalid, please try again")
 
@@ -68,8 +70,9 @@ def getDir(args):
 def getJUNOS():
     p_pkg = getDir('EX4300-48P')
     mp_pkg = getDir('EX4300-48MP')
-    junos = {"p_pkg":p_pkg, "mp_pkg":mp_pkg}
-    return junos
+    c_pkg = getDir('EX2300-C-12P')
+    junos_pkg = {"p_pkg":p_pkg, "mp_pkg":mp_pkg, "c_pkg":c_pkg}
+    return junos_pkg
 
 # logging installation
 def myprogress(dev, report):
@@ -80,8 +83,7 @@ def myprogress(dev, report):
 # install junos on a chassis of same devices
 def install_onepkg(dev, pkg, action):
 
-    # test point
-#    return True, dev.facts['hostname']
+
 
     sw = SW(dev)
     ok, msg = sw.install(package=pkg, validate=False, progress=myprogress)
@@ -118,19 +120,17 @@ def installJUNOS(host, uname, passwd, junos, action):
             
             # chassis type dictates package
             chassis = fireblade_hw.chassis(dev)
-            if chassis == 'EX4300-48P':
-                pkg = junos["p_pkg"]
-                ok, msg, action_report = install_onepkg(dev, pkg, action)
-            elif chassis == 'EX4300-48MP':
-                pkg = junos["mp_pkg"]
-                ok, msg, action_report = install_onepkg(dev, pkg, action)
-            elif chassis == 'mixed':
-                p_pkg = junos["p_pkg"]
-                mp_pkg = junos["mp_pkg"]
-                ok, msg, action_report = install_twopkg(dev, p_pkg, mp_pkg, action)
+            if chassis == 'EX4300-48P' and junos["p_pkg"] != 'skip_pkg':
+                ok, msg, action_report = install_onepkg(dev, junos["p_pkg"], action)
+            elif chassis == 'EX4300-48MP' and junos["mp_pkg"] != 'skip_pkg':
+                ok, msg, action_report = install_onepkg(dev, junos["mp_pkg"], action)
+            elif chassis == 'EX2300-C-12P' and junos["c_pkg"] != 'skip_pkg':
+                ok, msg, action_report = install_onepkg(dev, junos["c_pkg"], action)
+            elif chassis == 'mixed' and junos["p_pkg"] != 'skip_pkg' and junos["mp_pkg"] != 'skip_pkg':
+                ok, msg, action_report = install_twopkg(dev, junos["p_pkg"], junos["mp_pkg"], action)
             else:
                 ok = False
-                action_report = f'JUNOS installation on {host} is skipped due to hardware mismatch'
+                action_report = f'JUNOS installation on {host} is skipped due to hardware mismatch, invaid or insufficient JUNOS installation package'
 
         return ok, host, action_report
 
@@ -143,7 +143,7 @@ def installJUNOS(host, uname, passwd, junos, action):
     except ConnectRefusedError as err:
         print(f"Connection to device was refused: {err}, please check NETCONF configuration")
     except RpcError as err:
-        print(f"RPC error: {err}")       
+        print(f"RPC error: {err}")
 
 def main():
 
@@ -164,7 +164,7 @@ def main():
     passwd = credential[1]
 
     # junos pkg info
-    junos = getJUNOS()
+    junos_pkg = getJUNOS()
 
     # run commands on each host in parallel
 
@@ -174,7 +174,7 @@ def main():
     print ('2) tail log files named "host-junosinstallation-yyyy-mm-dd.log" for detailed progress on each host\n')
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
-        futures = [executor.submit(installJUNOS, host, uname, passwd, junos, action) for host in hosts]
+        futures = [executor.submit(installJUNOS, host, uname, passwd, junos_pkg, action) for host in hosts]
         results =[]
 
         with open(summary_log,'a') as fo:
