@@ -1,6 +1,6 @@
-# fireblade.write.snapshot v0.1
+# fireblade.write.snapshot v1.0
 # features:
-# 1. 100 sessions in parallel
+# 1. 50 sessions in parallel
 # 2. write snapshot to alternative partition on ex4300p non-mixed chassis
 # 3. write snapshot to P members one by one on ex4300mp mixed chassis
 # 4. write report from each host to a dedicated log file
@@ -203,3 +203,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
