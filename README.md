@@ -9,10 +9,15 @@ NETAUTO empowers network administrators to perform CLI queries, configuration ch
 3) Simultaneous SSH up to 100 sessions.
 
 ## What's New
+### fireblade.write.snapshot v1.0 | September 2, 2025
+* introduce EX4300P Switches Snapshot Writer
+* writes system snapshot on ex4300-48p member one by one in any mixed chassis
+* writes system snapshot on ex4300-48p non-mixed chassis as a whole
+
 ### fireblade.rootpass v0.6 | June 20, 2025
-* added new feature to take input in cli interaction as new password. Default to auto-generated password without input
-* revised to push a universal password to all target hosts, removed the feature of random password generated for each device.
-* removed command line optional argument --port {830,80}
+* add new feature to take input in cli interaction as new password. Default to auto-generated password without input
+* revise to push a universal password to all target hosts, removed the feature of random password generated for each device.
+* remove command line optional argument --port {830,80}
 * see udpated section [Root Password Generator](#firebladerootpass) for details
 
 # Table of Content
@@ -24,9 +29,10 @@ NETAUTO empowers network administrators to perform CLI queries, configuration ch
 6. [JUNOS Installation](#firebladeji)
 7. [Inactive Interfaces Inventory](#firebladeii)
 8. [II Agent](#portusageslax)
-9. [Legacy Fireblade](#firebladepylegacy))
+9. [Legacy Fireblade](#firebladepylegacy)
 10. [Root Password Generator](#firebladerootpass)
 11. [Hardware Probe](#firebladehardwareprobe)
+12. [EX4300-48P System Snapshot Writer](#firebladesnapshotwriter)
 
 ## You as A User
 ### 1. A NOC User
@@ -544,4 +550,28 @@ optional arguments:
                         a host list
   -o FILE, --output FILE
                         output dictionary
+```
+## fireblade.snapshot.writer
+v1.0\
+Introducing fireblade.snapshot.writer for writing system snapshots on ex4300-48p non-mixed chassis, and ex4300-48p members in mixed chassis
+### Key Features
+1. 50 simultaneous sessions of snapshot writing at a time;
+2. Writes snapshot on each ex4300-48p member in a mixed chassis, one member a time until all members in a chassis are written;
+3. Writes snapshot on ex4300-48p non-mixed chassis as a whole;
+4. Generates running log messages for all hosts to a file dedicated by user
+### Command Line Options
+```
+usage: fireblade.write.snapshot.py [-h] (-H HOSTS [HOSTS ...] | -l FILE) -g
+                                   FILE
+
+EX4300-48P System Snapshot Writer
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -H HOSTS [HOSTS ...], --hosts HOSTS [HOSTS ...]
+                        hosts' FQDN in format of 'host1' 'host2'...single and double quote function the same.
+  -l FILE, --host_list FILE
+                        Direcotry to a list of hosts.
+  -g FILE, --runtime_log FILE
+                        Directory to a runtime log for reports from all hosts
 ```
