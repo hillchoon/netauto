@@ -22,7 +22,7 @@ import datetime
 def getArgs():
 
     parser = argparse.ArgumentParser(
-        description = 'EX4300P switches snapshot writer',
+        description = 'EX4300P System Snapshot Writer',
         formatter_class=argparse.RawTextHelpFormatter
         )
 
