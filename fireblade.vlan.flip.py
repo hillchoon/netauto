@@ -122,7 +122,7 @@ def config_change(dev,commands,mode,commit_at_time,confirm_time):
                 print_out += '\033[32m' + 'Changes committed.' + '\033[0m\n'
 
             elif mode == 'commit-at': # execute the commit-configuration RPC with at-time
-                report = dev.rpc.commit_configuration(at_time=commit_at_time)
+                report = dev.rpc.commit_configuration(at_time=commit_at_time, timeout=1200)
                 print_out += etree.tostring(report, pretty_print=True).decode()
 
             elif mode == 'commitconfirm': # execute the commit with a confirmation time
