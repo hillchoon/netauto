@@ -86,7 +86,7 @@ Run **ninja.hostinfo.processor.sh** to:
 * update columns switch, interface, original vlan with switch, interface, original vlan info of matching mac from `<corename>.mac.map.csv`, and
 * update new vlan with proper value depends on whether the IP is static.
 ```
-ninja.hostinfo.processor.sh -r tc.static.ip.ranges.csv -t tc.arp.csv -m tc.mac.map.csv -o tc.hosts.map.csv
+ninja.hostinfo.processor.sh -r <corename>.static.ip.ranges.csv -t <corename>.arp.csv -m <corename>.mac.map.csv -o <corename>.hosts.map.csv
 ```
 ## 5. NAC Interfaces
 ### Process Edge Interface Raw Data
@@ -102,5 +102,5 @@ Run **ninja.edge.int.processor.sh** to set new vlan value for all interfaces in 
 ### Generate/Push Change Commands to Edge Switches
 Run Netauto to generate interface vlan change commands and commit at specific date/time
 ```
-~$ python3 fireblade.vlan.flip.py -c <corename>nac.int.csv -m ...
+~$ python3 fireblade.vlan.flip.py -c <corename>.nac.int.csv -m ...
 ```
