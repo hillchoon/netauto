@@ -86,7 +86,7 @@ def change_cmd_gen(matrix):
         # Split the item into the four required sections.
         # It handles a mix of spaces and tabs as separators, if any.
         try:
-            hostname, interface, original_vlan, new_vlan = item.split()
+            hostname, interface, original_vlan, new_vlan = item.split(',')
         except ValueError:
             # Skip malformed lines
             print(f"Skipping malformed line: {item}")
