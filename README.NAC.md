@@ -23,7 +23,7 @@ Run Netauto to retrieve all MAC entries on the edge networks off from the core i
 ## 4. All Edge Interfaces in Interested VLANs
 Run Netauto to restrive interfaces of interested VLANs on all edge networks off from the core
 ```
-~$ python3 netauto/fireblade.mss.py -l <hosts.list> -c 'show configuration interfaces | display set | trim 15 | match "	vlan-name|...|trunk"' | tee <corename>.edge.interfaces.rawdata.log
+~$ python3 netauto/fireblade.mss.py -l <hosts.list> -c 'show configuration interfaces | display set | trim 15 | match "vlan-name|...|trunk"' | tee <corename>.edge.interfaces.rawdata.log
 ```
 
 # Process Raw Data
