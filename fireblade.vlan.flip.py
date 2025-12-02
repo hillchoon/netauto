@@ -1,13 +1,13 @@
-# fireblade.vlan.flip.py is a python3 tool 
+# fireblade.vlan.flip.py is a python3 tool
 # to deploy some VLAN changes on target hosts. It
 # 1. changes VLAN assignment on switch interfaces per specific rules;
 # 2. (thinking...)
 '''
 command line option vlan_change_matrix is a text file in below format:
-bby-brh7046-ext-1.managenet.sfu.ca  ge-0/0/10    DATA    NAC-UNPRIV
-bby-brh7046-ext-1.managenet.sfu.ca  ge-0/0/11    DATA    NAC-UNPRIV
-bby-ham1040-ext-1.managenet.sfu.ca  ge-0/0/10    DATA    NAC-UNPRIV
-bby-ham1040-ext-1.managenet.sfu.ca  ge-0/0/11    DATA    NAC-UNPRIV
+bby-brh7046-ext-1.managenet.sfu.ca,ge-0/0/10,DATA,NAC-UNPRIV
+bby-brh7046-ext-1.managenet.sfu.ca,ge-0/0/11,DATA,NAC-UNPRIV
+bby-ham1040-ext-1.managenet.sfu.ca,ge-0/0/10,DATA,NAC-UNPRIV
+bby-ham1040-ext-1.managenet.sfu.ca,ge-0/0/11,DATA,NAC-UNPRIV
 '''
 
 import sys
@@ -29,20 +29,20 @@ def getArgs():
         description = 'Specific VLAN Change Tool',
         formatter_class=argparse.RawTextHelpFormatter
         )
-    
+
     # arg 'vlan_change_matrix'
     parser.add_argument('-c', '--vlan_change_matrix',
         required = True,
-        metavar="FILE", 
+        metavar="FILE",
         help='A matrix file containing VLAN change info'
         )
 
     # arg 'mode'
     parser.add_argument('-m', '--mode',
         choices=['testride', 'commitconfirm', 'commit', 'commit-at'],
-        default='testride', 
-        help='Operation mode: Default to "testride". Other choices are:\n' + 
-        '"commitconfirm" for "commit confirm" with input minutes;\n' + 
+        default='testride',
+        help='Operation mode: Default to "testride". Other choices are:\n' +
+        '"commitconfirm" for "commit confirm" with input minutes;\n' +
         '"commit" as what it is; and\n' +
         '"commit-at" for "commit at specific time" with input datetime.'
         )
@@ -56,7 +56,7 @@ def getArgs():
     else:
         with open(f"{args.vlan_change_matrix}","r") as fo:
             vlan_matrix = [line.strip() for line in fo.readlines() if not line.startswith('#')]
-    
+
     return vlan_matrix, args.mode
 
 # process credential
@@ -114,6 +114,7 @@ def config_change(dev,commands,mode,commit_at_time,confirm_time):
         diff = cu.diff()
         print_out += f'{diff}\n' if len(commands) != 0 else f'{cu.diff(rb_id=1)}\n' if len(commands) == 0 else ''
         try:
+            # temporarily disable below 2 lines
             cu.commit_check(timeout=600)
             print_out += '\033[32m' + 'Changes passed commit check.' + '\033[0m\n'
 
@@ -122,7 +123,7 @@ def config_change(dev,commands,mode,commit_at_time,confirm_time):
                 print_out += '\033[32m' + 'Changes committed.' + '\033[0m\n'
 
             elif mode == 'commit-at': # execute the commit-configuration RPC with at-time
-                report = dev.rpc.commit_configuration(at_time=commit_at_time, timeout=1200)
+                report = dev.rpc.commit_configuration(at_time=commit_at_time,dev_timeout=600)
                 print_out += etree.tostring(report, pretty_print=True).decode()
 
             elif mode == 'commitconfirm': # execute the commit with a confirmation time
