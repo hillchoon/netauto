@@ -1,12 +1,16 @@
 import sys
 import os
+import re
 import datetime
 import argparse
+import hashlib
+from lxml import etree
 from getpass import getpass
 from jnpr.junos import Device
 from jnpr.junos.exception import *
 from jnpr.junos.utils.start_shell import StartShell
 from jnpr.junos.utils.config import Config
+from jnpr.junos.utils.scp import SCP
 from utils import formatter, fireblade_hw
 import concurrent.futures
 
@@ -14,12 +18,16 @@ import concurrent.futures
 def getArgs():
 
     parser = argparse.ArgumentParser(description = 'Fireblade.ii for inventory of inactive interfaces on Juniper switches')
-    
-    # group arg_host 
+
+    # group arg_host
     arg_host = parser.add_mutually_exclusive_group(required=True)
     arg_host.add_argument('-H', '--hosts', nargs='+', 
         help='hosts\' FQDN in format of \'host1\' \'host2\'...single and double quote function the same.')
-    arg_host.add_argument('-l', '--host_list', metavar="FILE", help='Direcotry to a list of hosts.')
+    arg_host.add_argument('-l', '--host_list', metavar="FILE", help='Direcotry of a list of hosts.')
+
+    # agent slax file location
+    parser.add_argument('-g', '--slax_file', metavar="FILE", required=True,
+        help='Directory of a local slax agent file')
 
     # start taking and processing args
     args = parser.parse_args()
@@ -34,7 +42,7 @@ def getArgs():
     else:
         hosts = args.hosts
 
-    return hosts
+    return hosts, args.slax_file
 
 # process credential
 def getCredential():
@@ -44,6 +52,14 @@ def getCredential():
     passwd = getpass('Password: ')
     credential[1] = passwd
     return credential
+
+# calculate MD5 hash of local file
+def get_md5_hash(filepath):
+    md5_hash = hashlib.md5()
+    with open(filepath, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            md5_hash.update(chunk)
+    return md5_hash.hexdigest()
 
 # function time_in_sec
 def time_in_sec(time):
@@ -62,7 +78,7 @@ def time_in_sec(time):
     return seconds
 
 # netconf session for inactive interface inquiry
-def action(host, uname, passwd, log_dir):
+def action(host, uname, passwd, log_dir, slax_file, local_agent_hash):
 
     try:
         with Device(host=host, user=uname, password=passwd) as dev:
@@ -70,21 +86,105 @@ def action(host, uname, passwd, log_dir):
             # fetch hardware info
             hw_dict = fireblade_hw.hw_dict(dev)
 
+            ## check if agent file exists on remote host
+            # initialize varibles
+            remote_path = '/var/db/scripts/op/portusage.slax'
+            remote_agent_flag = False
+            scp_agent_flag = True
+            report = f'{host}\n'
+
+            # Use PyEZ RPC to check if file exists
+            remote_agent_report = dev.rpc.file_list(path=remote_path)
+
+            # Check if remote agent exists by examining XML response
+            # If agent doesn't exist: <output>path: No such file or directory</output>
+            # If agent exists: <file-information><file-name>path</file-name></file-information>
+            output_elm = remote_agent_report.find('.//output')
+            file_info_elm = remote_agent_report.find('.//file-name')
+
+            if output_elm is not None and 'No such file or directory' in output_elm.text:
+                remote_agent_flag = False
+            elif file_info_elm is not None:
+                remote_agent_flag = True
+            else:
+                # unpected reponse format
+                remote_agent_flag = False
+
+            if remote_agent_flag:
+                # remote agent exists, check its MD5 hash using RPC
+                try:
+                    remote_agent_md5_report = dev.rpc.get_checksum_information(path=remote_path)
+                    # Extract MD5 from XML response: <checksum>hash</checksum>
+                    checksum_elm = remote_agent_md5_report.find('.//checksum')
+
+                    if checksum_elm is not None and checksum_elm.text:
+                        remote_agent_hash = checksum_elm.text.strip()
+
+                        if remote_agent_hash != local_agent_hash:
+                            report += f'Local & remote agent MD5 hash mismatch, '
+                            report += f'local agent is being copied to remote host\n'
+                        else:
+                            report += f'Remote agent verified'
+                            scp_agent_flag = False
+                    else:
+                        report += f'Unable to extract remote MD5 hash, '
+                        report += f'local agent is being copied to remote host\n'
+
+                except Exception as checksum_err:
+                    report += f'Error getting remote MD5 hash: {checksum_err}, '
+                    report += f'local agent is being copied to remote host\n'
+
+            else:
+                # remote agent doesn't exist
+                report += f'remtoe agent is not found, local agent is being copied to remote host\n'
+
+            if scp_agent_flag:
+                try:
+                    with SCP(dev) as scp:
+                        scp.put(slax_file, remote_path)
+
+                    # initialize varibles
+                    remote_agent_md5_report = None
+                    checksum_elm = None
+                    remote_agent_hash = None
+
+                    # verify agent file integrity after scp
+                    try:
+                        remote_agent_md5_report = dev.rpc.get_checksum_information(path=remote_path)
+                        checksum_elm = remote_agent_md5_report.find('.//checksum')
+
+                        if checksum_elm is not None and checksum_elm.text:
+                            remote_agent_hash = checksum_elm.text.strip()
+
+                            if remote_agent_hash == local_agent_hash:
+                                report += f'agent file copied and verified\n'
+                            else:
+                                raise Exception(f'MD5 checksum failed after scp')
+                        else:
+                            raise Exception('Unable to extract MD5 checksum from remote agent after scp')
+
+                    except Exception as verify_err:
+                        raise Exception(f'unable to verify MD5 checksum after scp: {verify_err}')
+
+                except Exception as scp_err:
+                    print(f'Error during SCP or verification: {scp_err}')
+                    return None
+
             # getting bootdays
             up_times = [value['up_time'] for key, value in hw_dict.items() if isinstance(value, dict) and 'up_time' in value]
             max_sec = max(map(time_in_sec, up_times))
             weeks, remaining_seconds = divmod(max_sec, 7 * 24 * 60 * 60)
             days, remaining_seconds = divmod(remaining_seconds, 24 * 60 * 60)
             boot_wd = f'{days}d' if weeks == 0 else f'{weeks}w{days}d'
-            
+
             # getting number of members
-            n_member = len(hw_dict['model_info'])
+            n_member = sum(1 for key in hw_dict['model_info'].keys() if 'fpc' in key)
 
             # getting number of MP members
-            n_mp = sum(value == 'EX4300-48MP' for value in hw_dict['model_info'].values())
+            n_mp = sum(1 for key, value in hw_dict['model_info'].items() if 'fpc' in key and value == 'EX4300-48MP')
 
             # getting number of P members
-            n_p = sum(value == 'EX4300-48P' for value in hw_dict['model_info'].values())
+            n_p = sum(1 for key, value in hw_dict['model_info'].items() if 'fpc' in key and value == 'EX4300-48P')
 
             # getting number of total copper interfaces
             n_interface_total = 48 * n_member if n_mp != 0 or n_p != 0 else 12 * n_member
@@ -95,7 +195,7 @@ def action(host, uname, passwd, log_dir):
             # getting interfaces in status of 'down' and their last flap time
             cli_output = host_shell.run(f"cli -c 'op portusage | no-more'", timeout=600)[1]
             trimed_output = formatter.pop_first_last_lines(cli_output)
-            
+
             # return error if error
             if re.match(r'.*error*', trimed_output[1]):
                 result = f'{host} error message: {trimed_output[1]}'
@@ -118,6 +218,7 @@ def action(host, uname, passwd, log_dir):
 
             # log list of inactive interfaces
             with open(f'{log_dir}/{host}.ii.list.log','a') as f_o:
+                f_o.write(report)
                 f_o.write(f'---inventory of inactive interfaces---\n{list_ii}')
                 f_o.write(f'\n---portusage raw data---\n{trimed_output}')
 
@@ -136,16 +237,49 @@ def action(host, uname, passwd, log_dir):
     except ConnectRefusedError as err:
         print(f"Connection to device was refused: {err}, please check NETCONF configuration")
     except RpcError as err:
-        print(f"RPC error: {err}")       
+        print(f"RPC error: {err}")
 
 def main():
 
     # command line options
     try:
-        hosts = getArgs()
+        hosts, slax_file = getArgs()
 
     except argparse.ArgumentError as err:
         print(f"Error: {err}")
+        return
+    except FileNotFoundError as err:
+        print(f"Error: {err}")
+        return
+    except Exception as err:
+        print(f"Unexpected error parsing arguments: {err}")
+        return
+
+    # verify slax file exists and calculate MD5
+    if not os.path.exists(slax_file):
+        print(f"Error: SLAX file not found: {slax_file}")
+        print(f"Please check the path and try again.")
+        return
+
+    if not os.path.isfile(slax_file):
+        print(f"Error: Path exists but is not a file: {slax_file}")
+        return
+
+    # verify file is readable
+    if not os.access(slax_file, os.R_OK):
+        print(f"Error: SLAX file is not readable: {slax_file}")
+        print(f"Please check file permissions and try again.")
+        return
+
+    # calculate MD5 hash
+    try:
+        local_md5 = get_md5_hash(slax_file)
+        print(f"Local portusage.slax MD5: {local_md5}\n")
+    except IOError as err:
+        print(f"Error reading SLAX file: {err}")
+        return
+    except Exception as err:
+        print(f"Error calculating MD5 hash: {err}")
         return
 
     # credential
@@ -165,8 +299,8 @@ def main():
     with open(f'{log_dir}/summary.log', 'w') as f_o:
         f_o.write('Hostname,Number of alive days,Number of members,Number of MPs,Number of Ps,Number of total interfaces,Number of inactive interfaces,Percentage of inactive interfaces\n')
         # run commands on each host in parallel
-        with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
-            futures = [executor.submit(action, host, uname, passwd, log_dir) for host in hosts]
+        with concurrent.futures.ThreadPoolExecutor(max_workers=50) as executor:
+            futures = [executor.submit(action, host, uname, passwd, log_dir, slax_file, local_md5) for host in hosts]
             concurrent.futures.wait(futures)
 
             for future in futures:
