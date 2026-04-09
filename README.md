@@ -1,14 +1,27 @@
-**Last updated on Jun 20, 2025.**
+**Last updated on April 09, 2026.**
 
 ## Introduction
-NETAUTO is a Python3-based network management toolkit designed for scalable campus networks utilizing Juniper Networks equipment. It has been tested and validated on JUNOS 21.4 kernel and earlier, along with junos-eznc 2.6.7. The toolkit has been successfully deployed on a network comprising more than 300 Juniper Networks hardware components.
+NETAUTO is a Python3-based network management toolkit designed for scalable Juniper network. It has served an enterprise network of over 300 Juniper routers/switches.
+* Python 3.10.12
+* junos-eznc 2.7.5
+* ncclient 0.7.0
 
-NETAUTO empowers network administrators to perform CLI queries, configuration changes, and JUNOS software upgrades on a campus network with:
+NETAUTO empowers network administrators to automate below various essential operational tasks on a Juniper network:
+1) Configuration management & provisioning;
+2) Run-time information query;
+3) Network OS maintenance;
+4) A[pliance & its capacity inventory;
+5) Scalable change implementation
+6) Future identified functions.
+
+with below features:
 1) Single login convenience
 2) Abundant options for manipulating target hosts and CLI commands
 3) Simultaneous SSH up to 100 sessions.
 
 ## What's New
+### ninja serial | November 2025
+* introduce a whole set of python3 and Bash scripts for NAC project.
 ### fireblade.write.snapshot v1.0 | September 2, 2025
 * introduce EX4300P Switches Snapshot Writer
 * writes system snapshot on ex4300-48p member one by one in any mixed chassis
