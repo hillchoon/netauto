@@ -25,12 +25,12 @@ def getArgs():
     arg_host.add_argument('-H', '--hosts', nargs='+', 
         help='hosts\' FQDN in format of \'host1\' \'host2\'...single and double quote function the same.')
     arg_host.add_argument('-l', '--host_list', metavar="FILE", help='Direcotry to a list of hosts.')
-    arg_host.add_argument('-t', '--host_cmd_table', metavar="FILE", help='Directory to a host-command table file.')
+    arg_host.add_argument('-t', '--host_cmd_table', metavar="FILE", help='Directory to a consolidated table of target hosts \nand their differentiated execution commands.')
 
     # group arg_cmd
     arg_cmd = parser.add_mutually_exclusive_group()
     arg_cmd.add_argument('-c', '--commands', nargs='+', 
-        help='command(s) in format of "command1" "command2"...single and double quote function the same.')
+        help="command(s) in format of 'command1' 'command2'...\nsingle quote is suggested to save double quote for JUNOS commands")
     arg_cmd.add_argument('-f', '--cmdfile', metavar="FILE", help='Directory to a cli command file.')
 
     # arg 'mode'
