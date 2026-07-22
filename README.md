@@ -1,18 +1,17 @@
-**Last updated on April 09, 2026.**
+**Last updated on July 22, 2026.**
 
 ## Introduction
-NETAUTO is a Python3-based network management toolkit designed for scalable Juniper network. It has served an enterprise network of over 300 Juniper routers/switches.
+Netauto is a Python3-based network management application designed for scalable Juniper network. It has served an enterprise network of over 300 Juniper routers/switches.
 * Python 3.10.12
 * junos-eznc 2.7.5
 * ncclient 0.7.0
 
-NETAUTO empowers network administrators to automate below various essential operational tasks on a Juniper network:
+Netauto empowers network administrators & operators to automate below various essential operational tasks on a Juniper network:
 1) Configuration management & provisioning;
 2) Run-time information query;
 3) Network OS maintenance;
-4) A[pliance & its capacity inventory;
+4) Appliance & its capacity inventory;
 5) Scalable change implementation
-6) Future identified functions.
 
 with below features:
 1) Single login convenience
@@ -20,6 +19,12 @@ with below features:
 3) Simultaneous SSH up to 100 sessions.
 
 ## What's New
+### fireblade.general.configuration.gen v1.0 | July 22, 2026
+* initial release of General Configuration Generator (GCG) that renders template and populates configuration
+### fireblade.mss v1.2 | July 22, 2026
+* new feature of executing differentiated commands or changes to target hosts
+### fireblade.ii v1.6 | July 22, 2026
+* strengthen robust to accommodate various flavors of chassis
 ### ninja serial | November 2025
 * introduce a whole set of python3 and Bash scripts for NAC project.
 ### fireblade.write.snapshot v1.0 | September 2, 2025
@@ -39,13 +44,14 @@ with below features:
 3. [You as A User](#you-as-a-user)
 4. [Common Command Line Arguments](#common-command-line-arguments)
 5. [fireblade.mss](#fireblademss)
-6. [JUNOS Installation](#firebladeji)
-7. [Inactive Interfaces Inventory](#firebladeii)
-8. [II Agent](#portusageslax)
-9. [Legacy Fireblade](#firebladepylegacy)
-10. [Root Password Generator](#firebladerootpass)
-11. [Hardware Probe](#firebladehardwareprobe)
-12. [EX4300-48P System Snapshot Writer](#firebladesnapshotwriter)
+6. [fireblade.general.configuration.gen](#firebladegeneralconfigurationgen)
+7. [JUNOS Installation](#firebladeji)
+8. [Inactive Interfaces Inventory](#firebladeii)
+9. [II Agent](#portusageslax)
+10. [Legacy Fireblade](#firebladepylegacy)
+11. [Root Password Generator](#firebladerootpass)
+12. [Hardware Probe](#firebladehardwareprobe)
+13. [EX4300-48P System Snapshot Writer](#firebladesnapshotwriter)
 
 ## You as A User
 ### 1. A NOC User
@@ -118,6 +124,12 @@ show spanning-tree statistics interface
 $
 ```
 ## fireblade.mss
+v1.2\
+**What's New**
+* adds new feature of executing differentiated commands or changes to target hosts
+* new flag of '-t' to take a consolidated file of individual target hosts and their differentiated execution commands
+* update logic for the introduction of '-t'
+
 v1.1\
 **What's New**
 * Adds feature of updating description of interfaces that are assigned to specific VLAN\
@@ -135,22 +147,25 @@ See details below from command line argument '-h'.
 
 ### Command Line Arguments
 ```
-usage: fireblade.mss.py [-h] (-H HOSTS [HOSTS ...] | -l FILE)
-                        [-c COMMANDS [COMMANDS ...] | -f FILE]
-                        [-m {show,testride,comconf,commit,intdesc}]
-                        [-p {bby,sry,van}] [-r {all,core,edge,dc,ext,mgmt}]
-                        [-d {all,c,p,mp,m}] [-s]
+$ python3 fireblade.mss.py -h
+usage: fireblade.mss.py [-h] (-H HOSTS [HOSTS ...] | -l FILE | -t FILE) [-c COMMANDS [COMMANDS ...] | -f
+                        FILE] [-m {show,testride,comconf,commit,intdesc}] [-p {bby,sry,van}]
+                        [-r {all,core,edge,ext,mgmt}] [-d {all,c,p,mp,m}] [-s]
 
 General Queries & Configuration Changes Tool
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   -H HOSTS [HOSTS ...], --hosts HOSTS [HOSTS ...]
                         hosts' FQDN in format of 'host1' 'host2'...single and double quote function the same.
   -l FILE, --host_list FILE
                         Direcotry to a list of hosts.
+  -t FILE, --host_cmd_table FILE
+                        Directory to a consolidated table of target hosts 
+                        and their differentiated execution commands.
   -c COMMANDS [COMMANDS ...], --commands COMMANDS [COMMANDS ...]
-                        command(s) in format of "command1" "command2"...single and double quote function the same.
+                        command(s) in format of 'command1' 'command2'...
+                        single quote is suggested to save double quote for JUNOS commands
   -f FILE, --cmdfile FILE
                         Directory to a cli command file.
   -m {show,testride,comconf,commit,intdesc}, --mode {show,testride,comconf,commit,intdesc}
@@ -161,11 +176,11 @@ optional arguments:
                         "intdesc" for "update interface description" with specific input VLAN names
   -p {bby,sry,van}, --campus {bby,sry,van}
                         Campus: self-explanatory. All campuses are covered if no option of campus is provided.
-  -r {all,core,edge,dc,ext,mgmt}, --role {all,core,edge,dc,ext,mgmt}
+  -r {all,core,edge,ext,mgmt}, --role {all,core,edge,ext,mgmt}
                         Chassis role: Default to "all" for all chassis. Other choices are: 
                         "core" for CORE switches;
                         "edge" for EDGE switches;
-                        "ext" for EXTENSION switches; "dc" for DATACENTRE switches, and "mgmt" for MANAGEMENT network.
+                        "ext" for EXTENSION switches; and "mgmt" for MANAGEMENT network.
   -d {all,c,p,mp,m}, --model {all,c,p,mp,m}
                         Chassis model: Default to "all" for all models,other choices are:
                         "c" for "EX2300-C-12P",
@@ -173,6 +188,7 @@ optional arguments:
                         "mp" for "EX4300-48MP",
                         and "m" for manual input.
   -s, --silencer        Silence the output for mismatch hosts.
+
 ```
 ### example 1 - make queries on 2 hosts
 ```
@@ -185,6 +201,23 @@ $ python3 ~/netauto/fireblade.mss.py -l ~/garage/hosts.all -f ~/garage/cli.addin
 ### example 3 - apply a change on multiple hosts
 ```
 $ python3 ~/netauto/fireblade.mss.py -l ~/garage/hosts.all -f ~/garage/cli.removing.vlan.xyz -m commit
+```
+### example 4 - execute differentiated commands on multiple hosts
+```
+$ cat ~/garage/consolidated.table
+$ start of table
+[host-a]
+show version
+
+[host-b]
+show interfaces terse ae*
+
+[host-c]
+show poe controller
+
+# end of table
+$
+$ python3 ~/netauto/fireblade.mss.py -t ~/garage/consolidated.table
 ```
 ## fireblade.ji
 v0.83\
