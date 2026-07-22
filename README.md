@@ -19,8 +19,8 @@ with below features:
 3) Simultaneous SSH up to 100 sessions.
 
 ## What's New
-### fireblade.general.configuration.gen v1.0 | July 22, 2026
-* initial release of General Configuration Generator (GCG) that renders template and populates configuration
+### fireblade.general.exec.command.gen v1.1 | July 22, 2026
+* initial release of General Execution Command Generator (GECG) that populates execution commands via template rendering & data feeding
 ### fireblade.mss v1.2 | July 22, 2026
 * new feature of executing differentiated commands or changes to target hosts
 ### fireblade.ii v1.6 | July 22, 2026
@@ -44,7 +44,7 @@ with below features:
 3. [You as A User](#you-as-a-user)
 4. [Common Command Line Arguments](#common-command-line-arguments)
 5. [fireblade.mss](#fireblademss)
-6. [fireblade.general.configuration.gen](#firebladegeneralconfigurationgen)
+6. [fireblade.general.exec.command.gen](#firebladegeneralexeccommandgen)
 7. [JUNOS Installation](#firebladeji)
 8. [Inactive Interfaces Inventory](#firebladeii)
 9. [II Agent](#portusageslax)
@@ -145,7 +145,7 @@ Introducing fireblade.mss for **m**ultiple **s**ession**s**.
 4) Silencer to mute output for hosts that mismatch given creteria.
 See details below from command line argument '-h'.
 
-### Command Line Arguments
+### Command Line Flags
 ```
 $ python3 fireblade.mss.py -h
 usage: fireblade.mss.py [-h] (-H HOSTS [HOSTS ...] | -l FILE | -t FILE) [-c COMMANDS [COMMANDS ...] | -f
@@ -219,6 +219,61 @@ show poe controller
 $
 $ python3 ~/netauto/fireblade.mss.py -t ~/garage/consolidated.table
 ```
+## fireblade.general.exec.command.gen
+v1.1\
+Initial relase of the General Execution Command Generator (GECG)
+### Key Features
+1) Dynamic templating
+2) Automatic host identification
+3) Dual output flavor
+See details below:
+### Command Line Flags
+```
+$ python3 fireblade.general.exec.command.gen.py -h
+usage: fireblade.general.exec.command.gen.py [-h] -t FILE -d FILE -o PATH [-m {c,i}] [-f {i,j}]
+
+General Execution Command Generator v1.1
+
+options:
+  -h, --help            show this help message and exit
+  -t FILE, --template FILE
+                        Path to the execution command template (e.g., template.conf)
+  -d FILE, --data FILE  Path to the CSV data file containing variable values
+  -o PATH, --output PATH
+                        Output path (destination file or directory)
+  -m {c,i}, --mode {c,i}
+                        Output Mode: 'c' for consolidated (default), 'i' for individual
+  -f {i,j}, --format {i,j}
+                        Output Format: 'i' for INI-alike (default), 'j' for JSON
+```
+### example of an execution command template
+All variables are defined by {{variable}}
+```
+delete interfaces ae0 unit 0 family ethernet-switching vlan members DATA
+delete policy-options prefix-list VLAN-DATA-SUBNETS
+delete policy-options prefix-list VLAN-DATA-GATEWAYS
+delete policy-options prefix-list DATA-SUBNET-BROADCASTS
+delete firewall family ethernet-switching filter VLAN-DATA-IN
+delete protocols igmp-snooping vlan DATA
+delete vlans DATA
+delete interfaces ae0 native-vlan-id 512
+delete interfaces irb unit 512
+delete routing-options static route 0.0.0.0/0
+set interfaces irb unit 513 family inet address {{serviceip}}/{{subnet}}
+set vlans NAC-UNPRIV l3-interface irb.513
+set routing-options static route 0.0.0.0/0 next-hop {{gateway}}
+set access radius-server 142.58.103.76 source-address {{serviceip}}
+set access radius-server 142.58.103.77 source-address {{serviceip}}
+set access radius-server 142.58.103.176 source-address {{serviceip}}
+```
+### example of a data feeding csv
+```
+hostname,serviceip,netmask,gateway
+host-a,10.0.0.1,24,10.0.0.254
+host-b,10.0.0.2,24,10.0.0.254
+...
+```
+
 ## fireblade.ji
 v0.83\
 Introducing fireblade.ji for **J**unos **I**nstallation
