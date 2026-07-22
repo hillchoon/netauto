@@ -18,7 +18,7 @@ import datetime
 
 def parse_args():
     parser = argparse.ArgumentParser(
-        description="General Configuration Generator",
+        description="General Execution Command Generator v1.1",
         formatter_class=argparse.RawTextHelpFormatter
     )
     
@@ -26,7 +26,7 @@ def parse_args():
         '-t', '--template',
         required=True,
         metavar="FILE",
-        help="Path to the template configuration file (e.g., template.conf)"
+        help="Path to the execution command template (e.g., template.conf)"
     )
     
     parser.add_argument(
@@ -54,7 +54,7 @@ def parse_args():
         '-f', '--format',
         choices=['i', 'j'],
         default='i',
-        help="Output Format: 'i' for INI (default), 'j' for JSON"
+        help="Output Format: 'i' for INI-alike (default), 'j' for JSON"
     )
     
     return parser.parse_args()
