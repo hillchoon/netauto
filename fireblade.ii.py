@@ -1,3 +1,5 @@
+# fireblade.ii.py v1.6 - use cli as data source for chassis member numbers, so as to avoid inaccuracy of model_info
+
 import sys
 import os
 import re
@@ -170,27 +172,26 @@ def action(host, uname, passwd, log_dir, slax_file, local_agent_hash):
                     print(f'Error during SCP or verification: {scp_err}')
                     return None
 
+            host_shell = StartShell(dev)
+            host_shell.open()
+
+            # getting virtual chassis member information
+            cli_vc_output = host_shell.run("cli -c 'show virtual-chassis | match prsnt | match fpc'", timeout=60)[1]
+            vc_lines = formatter.pop_first_last_lines(cli_vc_output)
+
+            n_p = sum(1 for line in vc_lines if 'ex4300-48p' in line.lower())
+            n_mp = sum(1 for line in vc_lines if 'ex4300-48mp' in line.lower())
+            n_member = n_mp + n_p if n_mp != 0 or n_p != 0 else 1
+
+            # getting number of total copper interfaces
+            n_interface_total = 48 * n_member if n_mp != 0 or n_p != 0 else 12 * n_member
+
             # getting bootdays
             up_times = [value['up_time'] for key, value in hw_dict.items() if isinstance(value, dict) and 'up_time' in value]
             max_sec = max(map(time_in_sec, up_times))
             weeks, remaining_seconds = divmod(max_sec, 7 * 24 * 60 * 60)
             days, remaining_seconds = divmod(remaining_seconds, 24 * 60 * 60)
             boot_wd = f'{days}d' if weeks == 0 else f'{weeks}w{days}d'
-
-            # getting number of members
-            n_member = sum(1 for key in hw_dict['model_info'].keys() if 'fpc' in key)
-
-            # getting number of MP members
-            n_mp = sum(1 for key, value in hw_dict['model_info'].items() if 'fpc' in key and value == 'EX4300-48MP')
-
-            # getting number of P members
-            n_p = sum(1 for key, value in hw_dict['model_info'].items() if 'fpc' in key and value == 'EX4300-48P')
-
-            # getting number of total copper interfaces
-            n_interface_total = 48 * n_member if n_mp != 0 or n_p != 0 else 12 * n_member
-
-            host_shell = StartShell(dev)
-            host_shell.open()
 
             # getting interfaces in status of 'down' and their last flap time
             cli_output = host_shell.run(f"cli -c 'op portusage | no-more'", timeout=600)[1]
