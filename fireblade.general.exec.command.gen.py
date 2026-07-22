@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-# fireblade.general.configuration.gen.py v1.1 - added feature to skip comment lines in both template and variable definition files
-# fireblade.general.configuration.gen.py v1.0 - initial release
+# fireblade.general.exec.command.gen.py v1.1 - added feature to skip comment lines in both template and variable definition files
+# fireblade.general.exec.command.gen.py v1.0 - initial release
 
 """
 fireblade.general.configuration.gen.py
