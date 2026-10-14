@@ -188,7 +188,9 @@ def main():
             
         # Render template for this host
         commands = render_template(template_content, cleaned_row)
-        host_configs[hostname] = commands
+        if hostname not in host_configs:
+            host_configs[hostname] = []
+        host_configs[hostname].extend(commands)
 
     # 5. Write configurations
     if mode == 'c':
