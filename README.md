@@ -1,4 +1,4 @@
-**Last updated on July 22, 2026.**
+**Last updated on October 14, 2026.**
 
 ## Introduction
 Netauto is a Python3-based network management application designed for scalable Juniper network. It has served an enterprise network of over 300 Juniper routers/switches.
@@ -19,6 +19,8 @@ with below features:
 3) Simultaneous SSH up to 100 sessions.
 
 ## What's New
+### fireblade.nettop v1.0 | October 14, 2026
+* initial release of Network Topology Mapping
 ### fireblade.general.exec.command.gen v1.01 | October 14, 2026
 * minor update
 ### fireblade.general.exec.command.gen v1.0 | July 22, 2026
@@ -47,13 +49,14 @@ with below features:
 4. [Common Command Line Arguments](#common-command-line-arguments)
 5. [fireblade.mss](#fireblademss)
 6. [fireblade.general.exec.command.gen](#firebladegeneralexeccommandgen)
-7. [JUNOS Installation](#firebladeji)
-8. [Inactive Interfaces Inventory](#firebladeii)
-9. [II Agent](#portusageslax)
-10. [Legacy Fireblade](#firebladepylegacy)
-11. [Root Password Generator](#firebladerootpass)
-12. [Hardware Probe](#firebladehardwareprobe)
-13. [EX4300-48P System Snapshot Writer](#firebladesnapshotwriter)
+7. [fireblade.nettop](#firebladenettop)
+8. [JUNOS Installation](#firebladeji)
+9. [Inactive Interfaces Inventory](#firebladeii)
+10. [II Agent](#portusageslax)
+11. [Legacy Fireblade](#firebladepylegacy)
+12. [Root Password Generator](#firebladerootpass)
+13. [Hardware Probe](#firebladehardwareprobe)
+14. [EX4300-48P System Snapshot Writer](#firebladesnapshotwriter)
 
 ## You as A User
 ### 1. A NOC User
@@ -222,7 +225,7 @@ $
 $ python3 ~/netauto/fireblade.mss.py -t ~/garage/consolidated.table
 ```
 ## fireblade.general.exec.command.gen
-v1.1\
+v1.01\
 Initial relase of the General Execution Command Generator (GECG)
 ### Key Features
 1) Dynamic templating
@@ -275,6 +278,48 @@ host-a,10.0.0.1,24,10.0.0.254
 host-b,10.0.0.2,24,10.0.0.254
 ...
 ```
+
+## fireblade.nettop
+v1.0\
+Introducing fireblade.nettop for Network Topology Mapping
+### Key features
+1) Processes LLDP neighbor information
+2) Processes Service IP information (optional)
+3) Maps all direct interconnections from core router to furthest remote network hop by hop
+4) Appends Service IP of each network node to the map (optional)
+### Command Line
+```
+usage: fireblade.nettop.py [-h] -lldp LLDP [-ip IP]
+
+Mapping Network Topology from Core to Remote Network.
+
+options:
+  -h, --help            show this help message and exit
+  -lldp LLDP, --lldp LLDP
+                        Path to LLDP log file
+  -ip IP, --ip IP       Path to file listing switch service IPs
+
+```
+### Example
+lldp file is the output from below Netauto run:
+```
+$ python3 netauto/fireblade.mss.py -l all.host -c 'show lldp neighbors | match "core|edge|ext|pan|ex4300|csdc|l1|l2|l3" | except "ndd|neh"'
+```
+service ip file is the output from below Netauto run:
+```
+$ python3 netauto/fireblade.mss.py -l all.host -c 'show interfaces terse irb.513 | match "172.16"'
+```
+Feed the above 2 output files to this topology mapping:
+```
+$ python3 netauto/fireblade.nettop.py -lldp logs/lldp.neighbor.all.log -ip logs/serviceip.log
+=== FULL TOPOLOGY PATHS FROM ROUTER TO FURTHEST SWITCH ===
+router-1,ae10,switch-1,192.168.0.253/32
+router-1,ae10,switch-1,ge-0/0/9,switch-2,192.168.0.252/32
+<omitted>
+```
+The above interlink mapping reflects:\
+**router-1** port ae10 --link-- **switch-1** (ip 192.168.0.253/32)\
+**router-1** port ae10 --link-- **switch-1** port ge-0/0/9 --link-- **switch-2** (ip 192.68.0.252/32)
 
 ## fireblade.ji
 v0.83\
