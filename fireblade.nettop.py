@@ -203,7 +203,7 @@ def trace_connections(devices, service_ips):
 
 def main():
   parser = argparse.ArgumentParser(
-      description='Trace router-to-switch topology and map service IPs.'
+      description='Mapping Network Topology from Core to Remote Network.'
   )
   parser.add_argument(
       '-lldp', '--lldp', required=True, help='Path to LLDP log file'
