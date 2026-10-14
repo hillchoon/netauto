@@ -19,7 +19,9 @@ with below features:
 3) Simultaneous SSH up to 100 sessions.
 
 ## What's New
-### fireblade.general.exec.command.gen v1.1 | July 22, 2026
+### fireblade.general.exec.command.gen v1.01 | October 14, 2026
+* minor update
+### fireblade.general.exec.command.gen v1.0 | July 22, 2026
 * initial release of General Execution Command Generator (GECG) that populates execution commands via template rendering & data feeding
 ### fireblade.mss v1.2 | July 22, 2026
 * new feature of executing differentiated commands or changes to target hosts
