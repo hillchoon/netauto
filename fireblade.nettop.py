@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+# fireblade.nettop.py v1.0 - init
+# takes lldp neighbors and service ip information from all network nodes
+# maps network interconnections from core to remote node (top to bottom or left to right)
+
 import argparse
 import re
 import sys
