@@ -19,6 +19,8 @@ with below features:
 3) Simultaneous SSH up to 100 sessions.
 
 ## What's New
+### fireblade.mss v1.2.1 | November 5, 2026
+* bug fixed - - '#' in front of a fqdn line doesn't comment out all following commands for this fqdn
 ### fireblade.nettop v1.0 | October 14, 2026
 * initial release of Network Topology Mapping
 ### fireblade.general.exec.command.gen v1.01 | October 14, 2026
