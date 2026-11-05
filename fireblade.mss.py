@@ -1,4 +1,7 @@
-# fireblade.mss.py v1.2 - added feature to skip the host and its commands in host-command table file if the host is commented out
+# fireblade.mss.py v1.2.1 - fixed bug - '#' in front of a fqdn line doesn't comment out all commands 
+# for this host
+# fireblade.mss.py v1.2 - added feature to skip the host and its commands in host-command table file 
+# if the host is commented out
 
 import sys
 import argparse
@@ -25,12 +28,12 @@ def getArgs():
     arg_host.add_argument('-H', '--hosts', nargs='+', 
         help='hosts\' FQDN in format of \'host1\' \'host2\'...single and double quote function the same.')
     arg_host.add_argument('-l', '--host_list', metavar="FILE", help='Direcotry to a list of hosts.')
-    arg_host.add_argument('-t', '--host_cmd_table', metavar="FILE", help='Directory to a consolidated table of target hosts \nand their differentiated execution commands.')
+    arg_host.add_argument('-t', '--host_cmd_table', metavar="FILE", help='Directory to a host-command table file.')
 
     # group arg_cmd
     arg_cmd = parser.add_mutually_exclusive_group()
     arg_cmd.add_argument('-c', '--commands', nargs='+', 
-        help="command(s) in format of 'command1' 'command2'...\nsingle quote is suggested to save double quote for JUNOS commands")
+        help='command(s) in format of "command1" "command2"...single and double quote function the same.')
     arg_cmd.add_argument('-f', '--cmdfile', metavar="FILE", help='Directory to a cli command file.')
 
     # arg 'mode'
@@ -114,12 +117,12 @@ def table_parser(filepath):
             
             # Detect comments
             is_comment = line.startswith('#') or line.startswith(';')
-            clean_line = line[1:].strip() if is_comment else line
             
-            # Check if this line (or commented line) is a header block [hostname]
-            if clean_line.startswith('[') and clean_line.endswith(']'):
-                hostname = clean_line[1:-1].strip()
-                # If the header is commented out, or the hostname starts with '#', disable tracking
+            # Match [hostname] anywhere in the line (e.g. '[fqdn]', '# [fqdn]', '# pending... [fqdn]')
+            header_match = re.search(r'\[\s*([^\[\]]+)\s*\]', line)
+            if header_match:
+                hostname = header_match.group(1).strip()
+                # If the line is commented out, or the bracketed name starts with '#', disable tracking
                 if is_comment or hostname.startswith('#'):
                     current_host = None
                 else:
